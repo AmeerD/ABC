@@ -1,0 +1,38 @@
+Package: abcR
+Type: Package
+Title: Tools Supporting the Adjusted Bayesian Completion Rates (ABC) Model
+Version: 0.1.0
+Authors@R: c(
+    person("Bilal", "Barakat", email="bf.barakat@unesco.org", role = c("aut", "cre")),
+    person("Ameer", "Dharamshi", email="ameerdharamshi@gmail.com", role = c("aut")))
+Description: The Adjusted Bayesian Completion Rates (ABC) Model is a framework for 
+    estimating school completion rates as part of the SDG 4 monitoring initiatives. 
+    The abcR packages contains functions supporting said estimation at every step,
+    ranging from data construction, pre-processing, model execution, post-processing,
+    and plotting. More about the model can be read here (INSERT REPORT HERE!)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    magrittr,
+    purrr,
+    stats,
+    dplyr,
+    ggplot2,
+    rstan,
+    stringr,
+    tidyr,
+    tidybayes,
+    glue,
+    modelr,
+    lubridate,
+    loo,
+    bayesplot,
+    readr,
+    countrycode,
+    ggthemes,
+    forcats,
+    utils
+Suggests: 
+    haven
