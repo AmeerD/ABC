@@ -8,6 +8,10 @@ init_drift(ncountry, nyears, joint = FALSE)
 }
 \arguments{
 \item{ncountry}{Number of countries.}
+
+\item{nyears}{Number of years.}
+
+\item{joint}{Boolean indicating if this is input for the joint model.}
 }
 \value{
 Initial values for the drift parameter

@@ -33,6 +33,7 @@ Imports:
     countrycode,
     ggthemes,
     forcats,
-    utils
+    utils,
+    qs
 Suggests: 
     haven

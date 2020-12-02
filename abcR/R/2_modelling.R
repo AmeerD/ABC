@@ -62,7 +62,7 @@ wide_bkprj_4mdl <- function(df) {
 #' @export
 mdl_prep <- function(df, cutoff = 0.98, ...) {
   baseyear    <- min(df$year) - 1
-  
+
   df %>%
     #
     group_by(country) %>%
@@ -72,8 +72,8 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
       se_q2 = se/dnorm(qnorm(value))
     ) %>%
     ungroup %>%
-    
-    
+
+
     #group_by(country, survey) %>%
     #mutate(se_temp = ifelse(is.finite(se_q), se_q, NA),
     #       se_mean = mean(se_temp, na.rm = TRUE)) %>%
@@ -87,7 +87,7 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
       #                   TRUE        ~ se_q)
     ) %>%
     #select(-se_temp, -se_mean) %>%
-    
+
     tidybayes::compose_data() %>%
     within(., {
       year = year - baseyear
@@ -171,6 +171,8 @@ mdl_compile <- function(model = modelfile) {
 #' precision limitations. Thus, we consider Unif(-0.5,2) instead.
 #'
 #' @param ncountry Number of countries.
+#' @param nyears Number of years.
+#' @param joint Boolean indicating if this is input for the joint model.
 #'
 #' @return Initial values for the drift parameter
 init_drift <- function(ncountry, nyears, joint = FALSE) {
@@ -193,6 +195,10 @@ init_drift <- function(ncountry, nyears, joint = FALSE) {
 #' @param chain_nr NUTS chain number.
 #' @param init Initialization method.
 #' @param model ABC Stan model.
+#' @param nchains Number of chains.
+#' @param nburn Number of burn-in iterations
+#' @param niter Number of sampling iterations.
+#' @param nthin Thining parameter.
 #' @param ... Pass through parameters.
 #'
 #' @return Returns a stanfit object.

@@ -34,5 +34,6 @@
 #' @importFrom stats lm predict sd quantile weighted.mean na.omit
 #' @importFrom tidyr nest unnest
 #' @importFrom rstan stan_model stan sampling
+#' @importFrom qs qread
 #' @name abcR
 NULL

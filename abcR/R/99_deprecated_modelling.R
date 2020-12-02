@@ -62,19 +62,23 @@ pars <- c(
 #'
 #' @param data Input data list.
 #' @param chain_nr NUTS chain number.
+#' @param modelfile Path to Stan model.
+#' @param nchains Number of chains.
+#' @param nthin Chain thinning parameter.
+#' @param ... Pass through parameters.
 #'
 #' @export
-mdl_inits <- function(data, chain_nr) {
+mdl_inits <- function(data, chain_nr, modelfile, nchains, nthin, ...) {
   mod <- stan(
     seed = 2019,
     chain_id = chain_nr,
-    chains = N_chains,
+    chains = nchains,
     data = data,
     init_r = 2,
     #pars = pars,
     warmup = 5000,
     iter   = 10000,
-    thin   = N_thin,
+    thin   = nthin,
     control = list(adapt_delta = 0.75, max_treedepth = 7),
     model_code = modelfile)
 

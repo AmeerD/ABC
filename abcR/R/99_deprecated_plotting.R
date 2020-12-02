@@ -129,33 +129,29 @@ bkprj_plot <- function(df, cs, lvl = 'prim', sx = 'total') {
         geom_point(data = blacklisted, colour = 'Red', shape = 25, size = 2, fill = 'Red', alpha = 0.5)}
 }
 
-#' Plot long-term drift (Deprecated)
-#'
-#' @param df Model output (Processed by deprecated mdl_process).
-#'
-#' @export
-mk_drift_plot <- function(df) {
-  drifts <-
-    df$pars_iter$drift %>%
-    {semi_join(
-      .,
-      group_by(., country) %>%
-        summarise(value = mean(value)) %>%
-        mutate(q = cut(value, c(-Inf, quantile(value), Inf), labels = FALSE)) %>%
-        group_by(q) %>%
-        sample_n(1) %>%
-        ungroup,
-      by = 'country')}
 
-  drift_prior <- data.frame(x = rnorm(1e7, sd = 1/100, mean = rexp(1e7, rate = 1)))
-
-  ggplot(data = drift_prior, aes(x = x))+
-    geom_density(adjust = .2, aes(y = ..scaled.. * 100), n = 8192)+
-    theme_minimal()+
-    coord_cartesian(xlim = c(-.1, 1.5))+
-    scale_x_continuous(breaks = seq(-.1, 1.5, .1))+
-    geom_density(data = gs, adjust = 5, n = 8192,
-                 aes(group = country, fill = factor(country),
-                     x = value, y = ..scaled.. * 100), alpha = 0.5, size = .1)+
-    labs(y = 'density (scaled)', x = 'drift', fill = 'country')
-}
+#mk_drift_plot <- function(df) {
+#  drifts <-
+#    df$pars_iter$drift %>%
+#    {semi_join(
+#      .,
+#      group_by(., country) %>%
+#        summarise(value = mean(value)) %>%
+#        mutate(q = cut(value, c(-Inf, quantile(value), Inf), labels = FALSE)) %>%
+#        group_by(q) %>%
+#        sample_n(1) %>%
+#        ungroup,
+#      by = 'country')}
+#
+#  drift_prior <- data.frame(x = rnorm(1e7, sd = 1/100, mean = rexp(1e7, rate = 1)))
+#
+#  ggplot(data = drift_prior, aes(x = x))+
+#    geom_density(adjust = .2, aes(y = ..scaled.. * 100), n = 8192)+
+#    theme_minimal()+
+#    coord_cartesian(xlim = c(-.1, 1.5))+
+#    scale_x_continuous(breaks = seq(-.1, 1.5, .1))+
+#    geom_density(data = gs, adjust = 5, n = 8192,
+#                 aes(group = country, fill = factor(country),
+#                     x = value, y = ..scaled.. * 100), alpha = 0.5, size = .1)+
+#    labs(y = 'density (scaled)', x = 'drift', fill = 'country')
+#}

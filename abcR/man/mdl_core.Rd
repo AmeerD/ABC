@@ -25,6 +25,14 @@ mdl_core(
 
 \item{model}{ABC Stan model.}
 
+\item{nchains}{Number of chains.}
+
+\item{nburn}{Number of burn-in iterations}
+
+\item{niter}{Number of sampling iterations.}
+
+\item{nthin}{Thining parameter.}
+
 \item{...}{Pass through parameters.}
 }
 \value{
