@@ -14,7 +14,7 @@
 remove_latest <- function(df, type = "filter") {
   if (type == "full") {
     df
-  } else if (type == "recent") {
+  } else if (type == "rec") {
     remove_recent(df)
   } else {
     df %>%
