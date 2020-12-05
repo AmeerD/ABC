@@ -14,6 +14,8 @@
 remove_latest <- function(df, type = "filter") {
   if (type == "full") {
     df
+  } else if (type == "recent") {
+    remove_recent(df)
   } else {
     df %>%
       group_by(country) %>%
@@ -35,8 +37,12 @@ remove_latest <- function(df, type = "filter") {
 #' @family testing functions
 #'
 #' @export
-remove_recent <- function(df, threshold = 2017) {
-  df %>% filter(obsyear <= threshold)
+remove_recent <- function(df, threshold = 2016) {
+  df %>%
+    group_by(country) %>%
+    mutate(sn = n_distinct(survey)) %>%
+    filter(obsyear <= threshold | sn == 1) %>%
+    select(-sn)
 }
 
 #' Observation level ABC test.
@@ -67,22 +73,22 @@ test_abc <- function(input, tests, mcmc) {
       select(model, everything())
     return(empty)
   }
-  
+
   startyear <- min(input$year)
   baseyear <- startyear - 1
   variable <- input %>% ungroup %>% select(variable) %>% distinct() %>% pull
   sex <- input %>% ungroup %>% select(sex) %>% distinct() %>% pull
-  
+
   lookup <- input %>%
     select(country, cap_adj) %>%
     distinct
-  
+
   tsmall <- tests %>%
     select(country, year, truage5mlt, obsage, recondist, value) %>%
     mutate(recondist3 = pmin(3, recondist),
            halfobsage = obsage/2) %>%
     select(-obsage, -recondist)
-  
+
   mcmc %>%
     tidybayes::recover_types(input) %>%
     tidybayes::spread_draws(
@@ -141,22 +147,22 @@ test_abc2 <- function(input, tests, mcmc) {
       select(model, everything())
     return(empty)
   }
-  
+
   startyear <- min(input$year)
   baseyear <- startyear - 1
   variable <- input %>% ungroup %>% select(variable) %>% distinct() %>% pull
   sex <- input %>% ungroup %>% select(sex) %>% distinct() %>% pull
-  
+
   lookup <- input %>%
     select(country, cap_adj) %>%
     distinct
-  
+
   tsmall <- tests %>%
     select(country, year, truage5mlt, obsage, recondist, value) %>%
     mutate(recondist3 = pmin(3, recondist),
            halfobsage = obsage/2) %>%
     select(-obsage)
-  
+
   mcmc %>%
     tidybayes::recover_types(input) %>%
     tidybayes::spread_draws(
@@ -218,10 +224,10 @@ alt1_smpl2 <- function(input, tests) {
       rename(level = variable)
     return(empty)
   }
-  
+
   df <- bind_rows(input %>% mutate(class = "train"),
                   tests %>% mutate(class = "test"))
-  
+
   smpl <- function(x) {
     mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ year)
     x %>%
@@ -231,7 +237,7 @@ alt1_smpl2 <- function(input, tests) {
       mutate(value = pnorm(value), pred = pnorm(pred)) %>%
       select(-class)
   }
-  
+
   df %>%
     group_by(country, variable, sex) %>%
     nest() %>%
@@ -276,10 +282,10 @@ alt1_smpl3 <- function(input, tests) {
       rename(level = variable)
     return(empty)
   }
-  
+
   df <- bind_rows(input %>% mutate(class = "train"),
                   tests %>% mutate(class = "test"))
-  
+
   smpl <- function(x) {
     mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ year)
     x %>%
@@ -289,7 +295,7 @@ alt1_smpl3 <- function(input, tests) {
       mutate(value = pnorm(value), pred = pnorm(pred)) %>%
       select(-class)
   }
-  
+
   df %>%
     group_by(country, variable, sex) %>%
     nest() %>%
@@ -336,10 +342,10 @@ alt2_flat2 <- function(input, tests) {
       rename(level = variable)
     return(empty)
   }
-  
+
   df <- bind_rows(input %>% mutate(class = "train"),
                   tests %>% mutate(class = "test"))
-  
+
   flat <- function(x) {
     mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ 1)
     x %>%
@@ -349,7 +355,7 @@ alt2_flat2 <- function(input, tests) {
       mutate(value = pnorm(value), pred = pnorm(pred)) %>%
       select(-class)
   }
-  
+
   df %>%
     group_by(country, variable, sex) %>%
     nest() %>%
@@ -394,10 +400,10 @@ alt2_flat3 <- function(input, tests) {
       rename(level = variable)
     return(empty)
   }
-  
+
   df <- bind_rows(input %>% mutate(class = "train"),
                   tests %>% mutate(class = "test"))
-  
+
   flat <- function(x) {
     mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ 1)
     x %>%
@@ -407,7 +413,7 @@ alt2_flat3 <- function(input, tests) {
       mutate(value = pnorm(value), pred = pnorm(pred)) %>%
       select(-class)
   }
-  
+
   df %>%
     group_by(country, variable, sex) %>%
     nest() %>%
@@ -449,7 +455,7 @@ alt3_ltst3 <- function(input, tests) {
     filter(obsyear == max(obsyear) & recondist == min(recondist)) %>%
     summarise(pred = mean(value, na.rm = TRUE)) %>%
     ungroup
-  
+
   tests %>%
     group_by(country, variable, sex) %>%
     filter(!is.na(value)) %>%
