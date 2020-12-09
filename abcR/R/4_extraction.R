@@ -128,7 +128,7 @@ get_pars <- function(df, raw_mcmc) {
     select(-.width, -.point, -.interval) %>%
     rename(parameter = variable, lower = .lower, upper = .upper) %>%
     ungroup %>%
-    mutate(level = (df %>% select(variable) %>% distinct %>% pull))
+    mutate(level = (df %>% ungroup %>% select(variable) %>% distinct %>% pull))
 }
 
 #' Extract Rhats
@@ -146,7 +146,7 @@ get_pars <- function(df, raw_mcmc) {
 get_rhats <- function(df, level, sex) {
   rhat      <- bayesplot::rhat(df)
   top9_rhat <- utils::tail(sort(rhat[!stringr::str_detect(names(rhat), c('yhat|yrepl|ll'))]), 9)
-  
+
   #tibble(parameter = ordered(names(top9_rhat)), rhat = top9_rhat, level = level, sex = sex) %>%
   #  mutate(parameter = reorder(parameter, rhat))
   tibble(parameter = names(top9_rhat), rhat = top9_rhat, level = level, sex = sex)

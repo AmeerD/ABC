@@ -41,7 +41,7 @@ remove_recent <- function(df, threshold = 2016) {
   df %>%
     group_by(country) %>%
     mutate(sn = n_distinct(survey)) %>%
-    filter(obsyear <= threshold | sn == 1) %>%
+    filter(year <= threshold | sn == 1) %>%
     select(-sn)
 }
 
@@ -79,12 +79,12 @@ test_abc <- function(input, tests, mcmc) {
   variable <- input %>% ungroup %>% select(variable) %>% distinct() %>% pull
   sex <- input %>% ungroup %>% select(sex) %>% distinct() %>% pull
 
-  lookup <- input %>%
-    select(country, cap_adj) %>%
-    distinct
+  # lookup <- input %>%
+  #   select(country, cap_adj) %>%
+  #   distinct
 
   tsmall <- tests %>%
-    select(country, year, truage5mlt, obsage, recondist, value) %>%
+    select(country, year, truage5mlt, obsage, recondist, value, cap_adj) %>%
     mutate(recondist3 = pmin(3, recondist),
            halfobsage = obsage/2) %>%
     select(-obsage, -recondist)
@@ -102,7 +102,7 @@ test_abc <- function(input, tests, mcmc) {
     select(-.iteration, -.chain) %>%
     rename(iteration = .draw) %>%
     inner_join(tsmall, by = c("country", "year")) %>%
-    left_join(lookup, by = c("country")) %>%
+    #left_join(lookup, by = c("country")) %>%
     mutate(pred = mu_ct + vlate * recondist3 - late * halfobsage - mult5err * truage5mlt,
            pred = pmax(pmin(pnorm(pred) + cap_adj, 1), 0)) %>%
     select(country, year, iteration, value, pred) %>%
