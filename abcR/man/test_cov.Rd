@@ -4,9 +4,11 @@
 \alias{test_cov}
 \title{Compute coverage probabilities}
 \usage{
-test_cov(test, raw_mcmc, type)
+test_cov(input, test, raw_mcmc, type)
 }
 \arguments{
+\item{input}{Input data frame.}
+
 \item{test}{Test data frame.}
 
 \item{raw_mcmc}{Raw Stan model output.}

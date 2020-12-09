@@ -527,14 +527,16 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
 
 #' Compute coverage probabilities
 #'
+#' @param input Input data frame.
 #' @param test Test data frame.
 #' @param raw_mcmc Raw Stan model output.
 #' @param type Type of test.
 #'
 #' @return Coverage probabilities.
 #' @export
-test_cov <- function(test, raw_mcmc, type) {
+test_cov <- function(input, test, raw_mcmc, type) {
   if (type == "full") {
+    base <- input
     reps <- raw_mcmc %>%
       tidybayes::gather_draws(yrepl[n]) %>%
       select(-.chain, -.iteration) %>%
@@ -544,6 +546,7 @@ test_cov <- function(test, raw_mcmc, type) {
       pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
       ungroup
   } else {
+    base <- test
     reps <- raw_mcmc %>%
       tidybayes::gather_draws(ytest[n,iters]) %>%
       select(-.chain, -.iteration) %>%
@@ -557,7 +560,7 @@ test_cov <- function(test, raw_mcmc, type) {
       ungroup
   }
 
-  test %>%
+  base %>%
     bind_cols(reps) %>%
     mutate(qval = qnorm(value - cap_adj)) %>%
     mutate(in80 = (qval >= lower_0.8 & qval <= upper_0.8),
