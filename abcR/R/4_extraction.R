@@ -162,7 +162,7 @@ get_rhats <- function(df, level, sex) {
 #'
 #' @family extraction functions
 get_parsamps <- function(raw_mcmc, par) {
-  extract(mcmc)[["par"]]
+  extract(raw_mcmc)[["par"]]
 }
 
 #' Extract Non-Sampling Variance Samples.
