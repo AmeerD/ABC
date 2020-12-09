@@ -470,3 +470,101 @@ alt3_ltst3 <- function(input, tests) {
     mutate(model = "latest", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
+
+#' Test model on new data
+#'
+#' \code{mdl_test} uses the results of a model run to test construct the posterior
+#' predictive distributions for new data.
+#'
+#' @param input Input data frame.
+#' @param testset Test data frame.
+#' @param raw_mcmc Raw Stan model output.
+#' @param model Generated quantities model.
+#' @param type Type of test.
+#'
+#' @return Returns a stanfit object.
+#' @export
+mdl_test <- function(input, testset, raw_mcmc, model, type) {
+  if (type == "full") {
+    return(raw_mcmc)
+  } else {
+    data <- bind_rows(input %>% mutate(test = 0),
+                      testset %>% mutate(test = 1)) %>%
+      mdl_prep()
+
+    idx <- data[["test"]] == 1
+
+    #Remove train data
+    data[["n"]] <- sum(data[["test"]])
+    data[["year"]] <- data[["year"]][idx]
+    data[["country"]] <- data[["country"]][idx]
+    data[["survey"]] <- data[["survey"]][idx]
+    data[["obsage"]] <- data[["obsage"]][idx]
+    data[["recondist"]] <- data[["recondist"]][idx]
+    data[["truage5mlt"]] <- data[["truage5mlt"]][idx]
+    data[["se_q2"]] <- data[["se_q2"]][idx]
+
+    #Append parameter samples
+    data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
+    data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
+    data[["late"]] <- get_parsamps(raw_mcmc, "late")
+    data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate")
+    data[["iters"]] <- dim(data[["late"]])[1]
+
+    if (type == "lso") {
+      data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+    } else {
+      data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
+      data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+    }
+
+    mod <- stan(model, seed = 2020, chains = 1, data = data,
+                warmup = 0, iter = 10, algorithm = "Fixed_param")
+    return(mod)
+  }
+
+}
+
+#' Compute coverage probabilities
+#'
+#' @param test Test data frame.
+#' @param raw_mcmc Raw Stan model output.
+#' @param type Type of test.
+#'
+#' @return Coverage probabilities.
+#' @export
+test_cov <- function(test, raw_mcmc, type) {
+  if (type == "full") {
+    reps <- raw_mcmc %>%
+      tidybayes::gather_draws(yrepl[n]) %>%
+      select(-.chain, -.iteration) %>%
+      tidybayes::point_interval(.value, .width = c(0.8, 0.9, 0.95)) %>%
+      select(-.value, -.point, -.interval) %>%
+      rename(lower = .lower, upper = .upper) %>%
+      pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
+      ungroup
+  } else {
+    reps <- raw_mcmc %>%
+      tidybayes::gather_draws(ytest[n,iters]) %>%
+      select(-.chain, -.iteration) %>%
+      #summarise(med = median(.value)) %>%
+      ungroup %>%
+      group_by(n, .variable) %>%
+      tidybayes::point_interval(.value, .width = c(0.8, 0.9, 0.95)) %>%
+      select(-.value, -.point, -.interval) %>%
+      rename(lower = .lower, upper = .upper) %>%
+      pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
+      ungroup
+  }
+
+  test %>%
+    bind_cols(reps) %>%
+    mutate(qval = qnorm(value - cap_adj)) %>%
+    mutate(in80 = (qval >= lower_0.8 & qval <= upper_0.8),
+           in90 = (qval >= lower_0.9 & qval <= upper_0.9),
+           in95 = (qval >= lower_0.95 & qval <= upper_0.95)) %>%
+    ungroup %>%
+    summarise(cov80 = sum(in80)/n(),
+              cov90 = sum(in90)/n(),
+              cov95 = sum(in95)/n())
+}
