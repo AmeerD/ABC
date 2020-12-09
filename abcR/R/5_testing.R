@@ -487,6 +487,8 @@ mdl_test <- function(input, testset, raw_mcmc, model) {
   if (nrow(testset) == 0) {
     return(raw_mcmc)
   } else {
+    print(model)
+
     data <- bind_rows(input %>% mutate(test = 0),
                       testset %>% mutate(test = 1)) %>%
       mdl_prep()
