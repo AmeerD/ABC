@@ -4,7 +4,7 @@
 \alias{mdl_test}
 \title{Test model on new data}
 \usage{
-mdl_test(input, testset, raw_mcmc, model)
+mdl_test(input, testset, raw_mcmc, model, type)
 }
 \arguments{
 \item{input}{Input data frame.}
@@ -14,6 +14,8 @@ mdl_test(input, testset, raw_mcmc, model)
 \item{raw_mcmc}{Raw Stan model output.}
 
 \item{model}{Generated quantities model.}
+
+\item{type}{Test type.}
 }
 \value{
 Returns a stanfit object.
