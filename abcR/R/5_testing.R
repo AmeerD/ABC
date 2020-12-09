@@ -480,12 +480,11 @@ alt3_ltst3 <- function(input, tests) {
 #' @param testset Test data frame.
 #' @param raw_mcmc Raw Stan model output.
 #' @param model Generated quantities model.
-#' @param type Type of test.
 #'
 #' @return Returns a stanfit object.
 #' @export
-mdl_test <- function(input, testset, raw_mcmc, model, type) {
-  if (type == "full") {
+mdl_test <- function(input, testset, raw_mcmc, model) {
+  if (nrow(testset) == 0) {
     return(raw_mcmc)
   } else {
     data <- bind_rows(input %>% mutate(test = 0),
@@ -530,12 +529,11 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
 #' @param input Input data frame.
 #' @param test Test data frame.
 #' @param raw_mcmc Raw Stan model output.
-#' @param type Type of test.
 #'
 #' @return Coverage probabilities.
 #' @export
-test_cov <- function(input, test, raw_mcmc, type) {
-  if (type == "full") {
+test_cov <- function(input, test, raw_mcmc) {
+  if (nrow(test == 0)) {
     base <- input
     reps <- raw_mcmc %>%
       tidybayes::gather_draws(yrepl[n]) %>%
