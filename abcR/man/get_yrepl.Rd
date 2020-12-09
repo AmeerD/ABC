@@ -23,6 +23,8 @@ Other extraction functions:
 \code{\link{get_bias}()},
 \code{\link{get_drift}()},
 \code{\link{get_muzero}()},
+\code{\link{get_nsvar}()},
+\code{\link{get_parsamps}()},
 \code{\link{get_pars}()},
 \code{\link{get_rhats}()}
 }

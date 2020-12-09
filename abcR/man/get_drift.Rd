@@ -24,6 +24,8 @@ in a 90\% interval.
 Other extraction functions: 
 \code{\link{get_bias}()},
 \code{\link{get_muzero}()},
+\code{\link{get_nsvar}()},
+\code{\link{get_parsamps}()},
 \code{\link{get_pars}()},
 \code{\link{get_rhats}()},
 \code{\link{get_yrepl}()}

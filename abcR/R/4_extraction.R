@@ -93,8 +93,8 @@ get_bias <- function(df, raw_mcmc, rounds) {
     select(-.iteration, -.chain) %>%
     rename(iteration = .draw, variable = .variable, value = .value) %>%
     left_join(mutate(rounds, survey = paste0(country, survey, year))) %>%
-    mutate(level = (df %>% select(variable) %>% distinct %>% pull),
-           sex = (df %>% select(sex) %>% distinct %>% pull))
+    mutate(level = (df %>% ungroup %>% select(variable) %>% distinct %>% pull),
+           sex = (df %>% ungroup %>% select(sex) %>% distinct %>% pull))
 }
 
 #' Extract Model Parameters
@@ -150,4 +150,43 @@ get_rhats <- function(df, level, sex) {
   #tibble(parameter = ordered(names(top9_rhat)), rhat = top9_rhat, level = level, sex = sex) %>%
   #  mutate(parameter = reorder(parameter, rhat))
   tibble(parameter = names(top9_rhat), rhat = top9_rhat, level = level, sex = sex)
+}
+
+#' Extract Parameter Samples.
+#'
+#' Extracts samples for a specified parameter family to flow into the generated quantities
+#' model.
+#'
+#' @param raw_mcmc Stan model output
+#' @param par Parameter name
+#'
+#' @family extraction functions
+get_parsamps <- function(raw_mcmc, par) {
+  extract(mcmc)[["par"]]
+}
+
+#' Extract Non-Sampling Variance Samples.
+#'
+#' Extracts samples for non-sampling variance and subsequently merges them by country
+#' for input into the leave-survey-out generated quantities model.
+#'
+#' @param df Input data frame
+#' @param raw_mcmc Stan model output
+#'
+#' @family extraction functions
+get_nsvar <- function(df, raw_mcmc) {
+  unname(as.matrix(raw_mcmc %>%
+    tidybayes::recover_types(df) %>%
+    tidybayes::gather_draws(
+      sigma_s[survey]
+    ) %>%
+    ungroup %>%
+    mutate(country = substr(survey, 1, 3)) %>%
+    select(-.chain, -.iteration, -.variable, -survey) %>%
+    rename(iteration = .draw, value = .value) %>%
+    group_by(country, iteration) %>%
+    summarise(m = mean(value)) %>%
+    pivot_wider(names_from = "country", values_from = "m") %>%
+    select(-iteration) %>%
+    select(order(colnames(.)))))
 }
