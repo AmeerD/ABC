@@ -246,9 +246,9 @@ alt1_smpl2 <- function(input, tests) {
     ungroup() %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 1),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 1),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 1)) %>%
+    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 3),
+              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "simple", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
