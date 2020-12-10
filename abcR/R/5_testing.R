@@ -505,6 +505,7 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     data[["recondist"]] <- data[["recondist"]][idx]
     data[["truage5mlt"]] <- data[["truage5mlt"]][idx]
     data[["se_q2"]] <- data[["se_q2"]][idx]
+    data[["value"]] <- data[["value"]][idx]
 
     #Append parameter samples
     data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
@@ -512,6 +513,7 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     data[["late"]] <- get_parsamps(raw_mcmc, "late")
     data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate")
     data[["iters"]] <- dim(data[["late"]])[1]
+    data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
 
     if (type == "lso") {
       data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
@@ -521,7 +523,7 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     }
 
     mod <- stan(model, seed = 2020, chains = 1, data = data,
-                warmup = 0, iter = 10, algorithm = "Fixed_param")
+                warmup = 0, iter = 1, algorithm = "Fixed_param")
     return(mod)
   }
 
