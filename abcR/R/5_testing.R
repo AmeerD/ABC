@@ -518,7 +518,7 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
 
 
     mod <- stan(model, seed = 2020, chains = 1, data = data,
-                warmup = 0, iter = 1, algorithm = "Fixed_param")
+                warmup = 0, iter = 10, algorithm = "Fixed_param")
     return(mod)
   }
 
