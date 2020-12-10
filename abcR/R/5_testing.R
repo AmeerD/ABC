@@ -514,7 +514,14 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate")
     data[["iters"]] <- dim(data[["late"]])[1]
     data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
-    data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+
+    if (type == "lso") {
+      data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+    } else {
+      data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
+      data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+    }
+
 
 
     mod <- stan(model, seed = 2020, chains = 1, data = data,
