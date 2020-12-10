@@ -37,7 +37,7 @@ remove_latest <- function(df, type = "filter") {
 #' @family testing functions
 #'
 #' @export
-remove_recent <- function(df, threshold = 2016) {
+remove_recent <- function(df, threshold = 2015) {
   df %>%
     group_by(country) %>%
     mutate(sn = n_distinct(survey)) %>%
