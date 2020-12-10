@@ -55,7 +55,7 @@ mk_input_survey_plot <- function(input, survs) {
   mult5 <- input %>%
     filter(survey %in% survs) %>%
     filter(truage5mlt == 1)
-  
+
   input %>%
     filter(survey %in% survs) %>%
     ggplot(aes(x=year, y=value)) +
@@ -110,11 +110,11 @@ plt_country <- function(mdl_proj, mdl_obs, mdl_influential, target, use_influent
     mutate(variable = factor(variable, levels = levels))
   cht <- output %>% filter(series == "projected8")
   ind <- output %>% filter(series == "projected3t5")
-  
+
   if (!use_influential) {
     influential <- influential %>% anti_join(influential)
   }
-  
+
   ggplot(mapping = aes(x = year, y = value)) +
     geom_point(data = obs, aes(shape = survey)) +
     # geom_point(data = obs, size = .5, alpha = .5)+
@@ -153,7 +153,7 @@ plt_country <- function(mdl_proj, mdl_obs, mdl_influential, target, use_influent
 #' @export
 plt_cat <- function(mdl_proj, mdl_obs, level = "prim", sexes = "total",
                     target_yr = 2020, countries = sample(unique(mdl_obs$country), 3)) {
-  
+
   output <- mdl_proj %>%
     filter(country %in% countries & year <= target_yr & variable == level & sex == sexes) %>%
     mutate(country = countrycode::countrycode(country, 'iso3c', 'country.name'))
@@ -162,7 +162,7 @@ plt_cat <- function(mdl_proj, mdl_obs, level = "prim", sexes = "total",
     mutate(country = countrycode::countrycode(country, 'iso3c', 'country.name'))
   cht <- output %>% filter(series == "projected8")
   ind <- output %>% filter(series == "projected3t5")
-  
+
   ggplot(mapping = aes(x = year, y = value)) +
     geom_point(data = obs, aes(shape = survey)) +
     # geom_point(data = obs, size = .5, alpha = .5)+
@@ -241,7 +241,7 @@ mk_bias_plot <- function(iters) {
     ungroup %>%
     mutate(survey = paste0(survey, level, sex)) %>%
     mutate(survey = forcats::fct_reorder(survey, value))
-  
+
   by_type <- iters %>%
     select(type=round, iteration, survey, variable, value) %>%
     group_by(type, iteration) %>%
@@ -253,7 +253,7 @@ mk_bias_plot <- function(iters) {
     rename(lower = .lower, upper = .upper) %>%
     ungroup %>%
     select(type, value, lower, upper)
-  
+
   ggplot() +
     geom_pointrange(data = by_survey,
                     aes(x = survey, y = value, ymin = lower, ymax = upper),#, colour = type),
@@ -289,7 +289,9 @@ mk_par_plot <- function(df) {
   df %>%
     filter(parameter %in% c('beta_s', 'late', 'vlate', 'mult5err')) %>%
     mutate(parameter = factor(parameter, levels = c('beta_s', 'late', 'vlate', 'mult5err'),
-                              labels = c('survey bias', 'late completion', 'very late completion', 'age misreporting'))
+                              labels = c('survey bias', 'late completion', 'very late completion', 'age misreporting')),
+           level = factor(level, levels = c('prim', 'lsec', 'usec'),
+                          labels = c("Primary", "Lower Secondary", "Upper Secondary"))
     ) %>%
     mutate(value = case_when(
       parameter == 'very late completion' ~ value,
@@ -337,18 +339,18 @@ mk_reg_plot <- function(df, which_aggs = 'regions', endyr = 2020) {
       TRUE ~ ""),
       series = factor(series, levels = c("CR Indicator", "Upper Bracket CR", "Ultimate CR"))) %>%
     filter(series != "Upper Bracket CR")
-  
+
   p <- ggplot(data = plotdat, aes(x = year, y = CR))+
     geom_line(aes(linetype = series, colour = level), size = .75)+
     scale_color_brewer(palette = 'Dark2')+
     facet_grid(SDG.region ~ income_group)+
     scale_y_continuous(limits = c(0,1))+
     theme_minimal()
-  
+
   if (endyr > 2020) {
     p <- p + geom_vline(xintercept = 2020)
   }
-  
+
   switch(which_aggs,
          regions        = p+facet_wrap(~ SDG.region, ncol = 1),
          income         = p+facet_wrap(~ income_group, ncol = 1),
@@ -416,7 +418,7 @@ mk_trace_plot <- function(mcmc, rhats_all, lvl = "prim", sx = "total") {
     rhats_all %>%
     filter(level == lvl, sex == sx) %>%
     pull(parameter)
-  
+
   bayesplot::mcmc_trace(mcmc, pars = pars4trace, facet_args = list(ncol = 3, nrow = 3),
                         np = bayesplot::nuts_params(mcmc))+theme_minimal()
 }
