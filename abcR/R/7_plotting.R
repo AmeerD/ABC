@@ -304,7 +304,8 @@ mk_par_plot <- function(df) {
     geom_hline(yintercept = 0, size = .2)+
     # scale_y_continuous(limits = c(-.5, .5))+
     scale_colour_brewer(type = 'qual', palette = 'Set1')+
-    coord_flip()
+    coord_flip() +
+    theme(legend.position = "bottom")
 }
 
 #' Plot ABC Results by Region

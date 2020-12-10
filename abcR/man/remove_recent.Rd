@@ -4,7 +4,7 @@
 \alias{remove_recent}
 \title{Remove latest surveys by year.}
 \usage{
-remove_recent(df, threshold = 2016)
+remove_recent(df, threshold = 2015)
 }
 \arguments{
 \item{df}{Input data frame.}
