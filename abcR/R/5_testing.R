@@ -67,8 +67,9 @@ test_abc <- function(input, tests, mcmc) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything())
     return(empty)
@@ -112,8 +113,9 @@ test_abc <- function(input, tests, mcmc) {
     select(-.width, -.point, -.interval) %>%
     rename(lower = .lower, upper = .upper) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 3),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
               mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "ABC", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
@@ -141,8 +143,9 @@ test_abc2 <- function(input, tests, mcmc) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything())
     return(empty)
@@ -189,8 +192,9 @@ test_abc2 <- function(input, tests, mcmc) {
     group_by(country) %>%
     summarise(value = mean(value), pred = mean(pred)) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 3),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
               mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "ABC", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
@@ -217,8 +221,9 @@ alt1_smpl2 <- function(input, tests) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything()) %>%
       rename(level = variable)
@@ -246,8 +251,9 @@ alt1_smpl2 <- function(input, tests) {
     ungroup() %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 3),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
               mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "simple", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
@@ -275,8 +281,9 @@ alt1_smpl3 <- function(input, tests) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything()) %>%
       rename(level = variable)
@@ -307,9 +314,10 @@ alt1_smpl3 <- function(input, tests) {
     summarise(pred = mean(pred), value = mean(value)) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 1),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 1),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 1)) %>%
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
+              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "simple", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
@@ -335,8 +343,9 @@ alt2_flat2 <- function(input, tests) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything()) %>%
       rename(level = variable)
@@ -364,9 +373,10 @@ alt2_flat2 <- function(input, tests) {
     ungroup() %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 1),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 1),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 1)) %>%
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
+              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "flat", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
@@ -393,8 +403,9 @@ alt2_flat3 <- function(input, tests) {
       select(variable, sex) %>%
       distinct %>%
       mutate(model = "ABC",
-             mse.1000 = NA,
-             mad.100 = NA,
+             mse.100 = NA,
+             mae.100 = NA,
+             mbe.100 = NA,
              mmad.100 = NA) %>%
       select(model, everything()) %>%
       rename(level = variable)
@@ -425,9 +436,10 @@ alt2_flat3 <- function(input, tests) {
     summarise(pred = mean(pred), value = mean(value)) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 1),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 1),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 1)) %>%
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
+              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "flat", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
@@ -464,9 +476,10 @@ alt3_ltst3 <- function(input, tests) {
     left_join(preds, by = c("country", "variable", "sex")) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     group_by(variable, sex) %>%
-    summarise(mse.1000 = round(1000 * mean(diff_sq, na.rm = TRUE), 1),
-              mad.100 = round(100 * mean(abs(diff), na.rm = TRUE), 1),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 1)) %>%
+    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
+              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "latest", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
 }
