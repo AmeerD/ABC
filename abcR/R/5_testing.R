@@ -573,9 +573,10 @@ test_cov <- function(input, raw_mcmc, type) {
                 cov90 = sum(in90)/n(),
                 cov95 = sum(in95)/n())
   } else {
-    data.frame(coverage = row.names(summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))$summary),
-               summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))$summary, row.names=NULL) %>%
+    covs <- rstan::get_posterior_mean(raw_mcmc)
+    data.frame(coverage = row.names(covs), covs, row.names=NULL) %>%
+      filter(coverage != "lp__") %>%
       select(coverage, mean) %>%
-      pivot_wider(names_from = "coverage", values_from = "mean")
+      pivot_wider(names_from = "coverage", values_from = "mean.chain.1")
   }
 }

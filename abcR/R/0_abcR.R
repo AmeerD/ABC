@@ -33,7 +33,7 @@
 #' @importFrom stats median dnorm qnorm pnorm rnorm runif rexp
 #' @importFrom stats lm predict sd quantile weighted.mean na.omit
 #' @importFrom tidyr nest unnest
-#' @importFrom rstan stan_model stan sampling extract
+#' @importFrom rstan stan_model stan sampling extract get_posterior_mean
 #' @importFrom qs qread
 #' @name abcR
 NULL
