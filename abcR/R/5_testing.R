@@ -547,15 +547,13 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
 #' Compute coverage probabilities
 #'
 #' @param input Input data frame.
-#' @param test Test data frame.
 #' @param raw_mcmc Raw Stan model output.
 #' @param type Test type.
 #'
 #' @return Coverage probabilities.
 #' @export
-test_cov <- function(input, test, raw_mcmc, type) {
+test_cov <- function(input, raw_mcmc, type) {
   if (type == "full") {
-    base <- input
     reps <- raw_mcmc %>%
       tidybayes::gather_draws(yrepl[n]) %>%
       select(-.chain, -.iteration) %>%
@@ -564,29 +562,20 @@ test_cov <- function(input, test, raw_mcmc, type) {
       rename(lower = .lower, upper = .upper) %>%
       pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
       ungroup
-  } else {
-    base <- test
-    reps <- raw_mcmc %>%
-      tidybayes::gather_draws(ytest[n,iters]) %>%
-      select(-.chain, -.iteration) %>%
-      #summarise(med = median(.value)) %>%
+    input %>%
+      bind_cols(reps) %>%
+      mutate(qval = qnorm(value - cap_adj)) %>%
+      mutate(in80 = (qval >= lower_0.8 & qval <= upper_0.8),
+             in90 = (qval >= lower_0.9 & qval <= upper_0.9),
+             in95 = (qval >= lower_0.95 & qval <= upper_0.95)) %>%
       ungroup %>%
-      group_by(n, .variable) %>%
-      tidybayes::point_interval(.value, .width = c(0.8, 0.9, 0.95)) %>%
-      select(-.value, -.point, -.interval) %>%
-      rename(lower = .lower, upper = .upper) %>%
-      pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
-      ungroup
+      summarise(cov80 = sum(in80)/n(),
+                cov90 = sum(in90)/n(),
+                cov95 = sum(in95)/n())
+  } else {
+    data.frame(coverage = row.names(summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))$summary),
+               summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))) %>%
+      select(coverage, mean) %>%
+      pivot_wider(names_from = "coverage", values_from = "mean")
   }
-
-  base %>%
-    bind_cols(reps) %>%
-    mutate(qval = qnorm(value - cap_adj)) %>%
-    mutate(in80 = (qval >= lower_0.8 & qval <= upper_0.8),
-           in90 = (qval >= lower_0.9 & qval <= upper_0.9),
-           in95 = (qval >= lower_0.95 & qval <= upper_0.95)) %>%
-    ungroup %>%
-    summarise(cov80 = sum(in80)/n(),
-              cov90 = sum(in90)/n(),
-              cov95 = sum(in95)/n())
 }
