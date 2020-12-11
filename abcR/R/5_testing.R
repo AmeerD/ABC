@@ -16,6 +16,14 @@ remove_latest <- function(df, type = "filter") {
     df
   } else if (type == "rec") {
     remove_recent(df)
+  } else if (type == "ran") {
+    df %>%
+      anti_join(df %>%
+                  group_by(survey) %>%
+                  mutate(n = n()) %>%
+                  filter(n > 5) %>%
+                  select(-n) %>%
+                  slice_sample(n=2))
   } else {
     df %>%
       group_by(country) %>%
