@@ -576,7 +576,7 @@ test_cov <- function(input, raw_mcmc, type) {
     covs <- rstan::get_posterior_mean(raw_mcmc)
     data.frame(coverage = row.names(covs), covs, row.names=NULL) %>%
       filter(coverage != "lp__") %>%
-      select(coverage, mean) %>%
-      pivot_wider(names_from = "coverage", values_from = "mean.chain.1")
+      select(coverage, mean = mean.chain.1) %>%
+      pivot_wider(names_from = "coverage", values_from = "mean")
   }
 }
