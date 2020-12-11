@@ -574,7 +574,7 @@ test_cov <- function(input, raw_mcmc, type) {
                 cov95 = sum(in95)/n())
   } else {
     data.frame(coverage = row.names(summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))$summary),
-               summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))) %>%
+               summary(raw_mcmc, pars=c("cov80", "cov90", "cov95"))$summary, row.names=NULL) %>%
       select(coverage, mean) %>%
       pivot_wider(names_from = "coverage", values_from = "mean")
   }
