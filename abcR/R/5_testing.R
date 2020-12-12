@@ -19,6 +19,7 @@ remove_latest <- function(df, type = "filter") {
   } else if (type == "ran") {
     df %>%
       anti_join(df %>%
+                  filter(year != min(year)) %>%
                   group_by(survey) %>%
                   mutate(n = n()) %>%
                   filter(n > 5) %>%
