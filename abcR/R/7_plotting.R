@@ -212,7 +212,7 @@ mk_repl_plot <- function(obs, reps, n) {
         # geom_violin(draw_quantiles = c(.1, .5, .9))+
         geom_violin(scale = 'width')+
         # geom_boxplot(outlier.shape = NA, colour = 'grey50')+
-        geom_point(aes(y = target), shape = 18, colour = 'red', size = 2)+
+        geom_point(aes(y = target), shape = 18, colour = 'red', size = 1)+
         ggthemes::theme_tufte()+
         labs(x = '')+theme(axis.line.x = element_blank(),
                            axis.ticks.x = element_blank(),
