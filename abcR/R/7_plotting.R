@@ -196,13 +196,14 @@ plt_cat <- function(mdl_proj, mdl_obs, level = "prim", sexes = "total",
 #' @export
 mk_repl_plot <- function(obs, reps, n) {
   obs %>%
-    mutate(index = row_number()) %>%
-    group_by(country) %>%
+    mutate(index = row_number(),
+           decile = ntile(value, 10)) %>%
+    group_by(decile) %>%
     sample_n(n) %>%
     ungroup %>%
     select(country, variable, sex, year, value, index, survey, obsage, recondist, cap_adj) %>%
     rename(target = value) %>%
-    dplyr::inner_join(reps, by = c('country', 'year', 'index')) %>%
+    dplyr::inner_join(reps, by = c('country', 'year', 'index', 'survey')) %>%
     mutate(value = pmax(pmin(pnorm(value) + cap_adj, 1), 0)) %>%
     arrange(target) %>%
     # mutate(index = ordered(index, levels = unique(index))) %>%
