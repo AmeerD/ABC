@@ -177,8 +177,7 @@ mdl_compile <- function(model = modelfile) {
 init_drift <- function(ncountry, nyears, joint = FALSE) {
   if (joint) {
     list(struc = runif(ncountry, min = -0.2, max = 0.2),
-         drift = matrix(runif(2*ncountry, min = -0.2, max = 0.2), nrow=2),
-         e_ct = array(runif(2*ncountry*nyears, min=-0.2, max=0.2), dim=c(2,ncountry,nyears)))
+         drift = matrix(runif(2*ncountry, min = -0.2, max = 0.2), ncol=2))
   } else {
     list(drift = runif(ncountry, min = -0.5, max = 2))
   }
