@@ -135,18 +135,17 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
 #' model input thus completing the input list for the joint model.
 #'
 #' @param inputs Pre-processed ABC model input.
-#' @param props Optional male proportions matrix.
+#' @param jpars Optional joint modelling parameters.
 #' @param ... Pass through parameters.
 #'
 #' @return Outputs a list formatted as input into the ABC joint Stan model.
 #'
 #' @export
-mdl_joint_prep <- function(inputs, props = NULL, ...) {
-  if (is.null(props)) {
+mdl_joint_prep <- function(inputs, jpars = NULL, ...) {
+  if (is.null(jpars)) {
     inputs
   } else {
-    inputs[["mprop"]] = props
-    inputs
+    c(inputs, jpars)
   }
 }
 

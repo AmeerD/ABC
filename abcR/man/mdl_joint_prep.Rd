@@ -4,12 +4,12 @@
 \alias{mdl_joint_prep}
 \title{Additional ABC model inputs for joint modelling.}
 \usage{
-mdl_joint_prep(inputs, props = NULL, ...)
+mdl_joint_prep(inputs, jpars = NULL, ...)
 }
 \arguments{
 \item{inputs}{Pre-processed ABC model input.}
 
-\item{props}{Optional male proportions matrix.}
+\item{jpars}{Optional joint modelling parameters.}
 
 \item{...}{Pass through parameters.}
 }
