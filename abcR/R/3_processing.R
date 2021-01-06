@@ -9,7 +9,7 @@
 #' @param raw_mcmc Raw ABC model MCMC output.
 #'
 #' @return Data frame with columns for country, year, series, value, lower,
-#' upper, vairable, and sex. Note that series corresponds to one of:
+#' upper, variable, and sex. Note that series corresponds to one of:
 #' \enumerate{
 #'     \item projected3t5 (Official completion rate indicator)
 #'     \item projected5 (Upper bracket of the indicator range)
@@ -22,11 +22,11 @@ mdl_process <- function(df, raw_mcmc) {
   baseyear <- startyear - 1
   variable <- df %>% ungroup %>% select(variable) %>% distinct() %>% pull
   sex <- df %>% ungroup %>% select(sex) %>% distinct() %>% pull
-  
+
   lookup <- df %>%
     select(country, cap_adj) %>%
     distinct
-  
+
   projected <- raw_mcmc %>%
     tidybayes::recover_types(df) %>%
     tidybayes::spread_draws(
@@ -65,8 +65,101 @@ mdl_process <- function(df, raw_mcmc) {
     ungroup %>%
     mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
     filter(year >= startyear)
-  
+
   projected %>% mutate(variable = variable, sex = sex)
+}
+
+#' Process ABC joint model output.
+#'
+#' \code{mdl_jt_process} operates on the raw stanfit object outputted by the ABC
+#' joint model and summarises the findings in a digestible format. Specifically,
+#' variants of the latent true completion rate are computed and presented in
+#' 90\% intervals.
+#'
+#' @param df Input data frame.
+#' @param raw_mcmc Raw ABC model MCMC output.
+#'
+#' @return Data frame with columns for country, year, series, value, lower,
+#' upper, variable, and sex. Note that series corresponds to one of:
+#' \enumerate{
+#'     \item projected3t5 (Official completion rate indicator)
+#'     \item projected5 (Upper bracket of the indicator range)
+#'     \item projected8 (Ultimate completion)
+#' }
+#'
+#' @export
+mdl_jt_process <- function(df, raw_mcmc) {
+  startyear <- min(df$year)
+  baseyear <- startyear - 1
+  variable <- df %>% ungroup %>% select(variable) %>% distinct() %>% pull
+
+  lookup <- df %>%
+    select(country, cap_adj) %>%
+    distinct
+
+  totals <- raw_mcmc %>%
+    tidybayes::recover_types(df) %>%
+    tidybayes::gather_draws(mu_tot[country, year]) %>%
+    ungroup %>%
+    select(-.iteration, -.chain) %>%
+    rename(iteration = .draw, mu5.ct = mu_tot) %>%
+    group_by(country, iteration) %>%
+    mutate(mu5.ct = pnorm(mu5.ct)) %>%
+    left_join(lookup, by="country") %>%
+    mutate(mu5.ct = pmax(pmin(mu5.ct + cap_adj, 1), 0)) %>%
+    select(-cap_adj) %>%
+    rename(projected5 = mu5.ct) %>%
+    select(country, year, iteration, projected5) %>%
+    tidyr::gather(series, value, projected5) %>%
+    group_by(country, year, series) %>%
+    tidybayes::point_interval(value, .width = 0.9) %>%
+    select(-.width, -.point, -.interval) %>%
+    rename(lower = .lower, upper = .upper) %>%
+    ungroup %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    filter(year >= startyear) %>%
+    mutate(sex = "total")
+
+  projected <- raw_mcmc %>%
+    tidybayes::recover_types(df) %>%
+    tidybayes::spread_draws(
+      mu_ct[sex, country, year],
+      late[country, sex],
+      vlate[country, sex]
+    ) %>%
+    ungroup %>%
+    mutate(year = year + baseyear) %>%
+    select(-.iteration, -.chain) %>%
+    rename(iteration = .draw) %>%
+    group_by(country, sex, iteration) %>%
+    arrange(year) %>%
+    mutate(
+      mu5.ct = mu_ct,
+      mu4.ct = dplyr::lead(mu_ct, 1) - late/2,
+      mu3.ct = dplyr::lead(mu_ct, 2) - late,
+      mu8.ct = mu_ct + vlate * 3
+    ) %>%
+    select(-mu_ct, -late, -vlate) %>%
+    mutate_at(.vars = vars(mu5.ct, mu4.ct, mu3.ct, mu8.ct), pnorm) %>%
+    left_join(lookup, by="country") %>%
+    mutate(mu5.ct = pmax(pmin(mu5.ct + cap_adj, 1), 0),
+           mu4.ct = pmax(pmin(mu4.ct + cap_adj, 1), 0),
+           mu3.ct = pmax(pmin(mu3.ct + cap_adj, 1), 0),
+           mu8.ct = pmax(pmin(mu8.ct + cap_adj, 1), 0)) %>%
+    select(-cap_adj) %>%
+    mutate(projected3t5 = (mu3.ct + mu4.ct + mu5.ct)/3) %>%
+    rename(projected5 = mu5.ct, projected8 = mu8.ct) %>%
+    select(country, year, sex, iteration, projected3t5, projected5, projected8) %>%
+    tidyr::gather(series, value, projected3t5, projected5, projected8) %>%
+    group_by(country, year, sex, series) %>%
+    tidybayes::point_interval(value, .width = 0.9) %>%
+    select(-.width, -.point, -.interval) %>%
+    rename(lower = .lower, upper = .upper) %>%
+    ungroup %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    filter(year >= startyear)
+
+  projected %>% bind_rows(totals) %>% mutate(variable = variable)
 }
 
 #' ABC model PSIS-LOO.
