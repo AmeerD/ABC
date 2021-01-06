@@ -4,12 +4,14 @@
 \alias{mdl_jt_process}
 \title{Process ABC joint model output.}
 \usage{
-mdl_jt_process(df, raw_mcmc)
+mdl_jt_process(df, raw_mcmc, props)
 }
 \arguments{
 \item{df}{Input data frame.}
 
 \item{raw_mcmc}{Raw ABC model MCMC output.}
+
+\item{props}{Annual population proportions.}
 }
 \value{
 Data frame with columns for country, year, series, value, lower,

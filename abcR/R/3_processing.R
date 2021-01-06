@@ -78,6 +78,7 @@ mdl_process <- function(df, raw_mcmc) {
 #'
 #' @param df Input data frame.
 #' @param raw_mcmc Raw ABC model MCMC output.
+#' @param props Annual population proportions.
 #'
 #' @return Data frame with columns for country, year, series, value, lower,
 #' upper, variable, and sex. Note that series corresponds to one of:
@@ -88,7 +89,7 @@ mdl_process <- function(df, raw_mcmc) {
 #' }
 #'
 #' @export
-mdl_jt_process <- function(df, raw_mcmc) {
+mdl_jt_process <- function(df, raw_mcmc, props) {
   startyear <- min(df$year)
   baseyear <- startyear - 1
   variable <- df %>% ungroup %>% select(variable) %>% distinct() %>% pull
@@ -96,30 +97,6 @@ mdl_jt_process <- function(df, raw_mcmc) {
   lookup <- df %>%
     select(country, cap_adj) %>%
     distinct
-
-  totals <- raw_mcmc %>%
-    tidybayes::recover_types(df) %>%
-    tidybayes::gather_draws(mu_tot[country, year]) %>%
-    ungroup %>%
-    mutate(year = year + baseyear) %>%
-    select(-.iteration, -.chain, -.variable) %>%
-    rename(iteration = .draw, mu5.ct = .value) %>%
-    group_by(country, iteration) %>%
-    mutate(mu5.ct = pnorm(mu5.ct)) %>%
-    left_join(lookup, by="country") %>%
-    mutate(mu5.ct = pmax(pmin(mu5.ct + cap_adj, 1), 0)) %>%
-    select(-cap_adj) %>%
-    rename(projected5 = mu5.ct) %>%
-    select(country, year, iteration, projected5) %>%
-    tidyr::gather(series, value, projected5) %>%
-    group_by(country, year, series) %>%
-    tidybayes::point_interval(value, .width = 0.9) %>%
-    select(-.width, -.point, -.interval) %>%
-    rename(lower = .lower, upper = .upper) %>%
-    ungroup %>%
-    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
-    filter(year >= startyear) %>%
-    mutate(sex = "total")
 
   projected <- raw_mcmc %>%
     tidybayes::recover_types(df) %>%
@@ -141,6 +118,13 @@ mdl_jt_process <- function(df, raw_mcmc) {
       mu8.ct = mu_ct + vlate * 3
     ) %>%
     select(-mu_ct, -late, -vlate) %>%
+    tidyr::pivot_longer(cols = starts_with("mu"), names_to = "indicator", values_to = "value") %>%
+    tidyr::pivot_wider(names_from = "sex", values_from = "value") %>%
+    left_join(props, by = c("country", "year")) %>%
+    mutate(total = female*fprop + male*mprop) %>%
+    select(-mprop, -fprop) %>%
+    tidyr::pivot_longer(cols = c("female", "male", "total"), names_to = "sex", values_to = "value") %>%
+    tidyr::pivot_wider(names_from = "indicator", values_from = "value") %>%
     mutate_at(.vars = vars(mu5.ct, mu4.ct, mu3.ct, mu8.ct), pnorm) %>%
     left_join(lookup, by="country") %>%
     mutate(mu5.ct = pmax(pmin(mu5.ct + cap_adj, 1), 0),
