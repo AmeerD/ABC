@@ -144,7 +144,7 @@ mdl_jt_process <- function(df, raw_mcmc, props) {
     mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
     filter(year >= startyear)
 
-  projected %>% bind_rows(totals) %>% mutate(variable = variable)
+  projected %>% mutate(variable = variable)
 }
 
 #' ABC model PSIS-LOO.
