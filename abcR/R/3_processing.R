@@ -101,8 +101,9 @@ mdl_jt_process <- function(df, raw_mcmc) {
     tidybayes::recover_types(df) %>%
     tidybayes::gather_draws(mu_tot[country, year]) %>%
     ungroup %>%
-    select(-.iteration, -.chain) %>%
-    rename(iteration = .draw, mu5.ct = mu_tot) %>%
+    mutate(year = year + baseyear) %>%
+    select(-.iteration, -.chain, -.variable) %>%
+    rename(iteration = .draw, mu5.ct = .value) %>%
     group_by(country, iteration) %>%
     mutate(mu5.ct = pnorm(mu5.ct)) %>%
     left_join(lookup, by="country") %>%
