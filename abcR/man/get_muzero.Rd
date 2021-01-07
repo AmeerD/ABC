@@ -25,6 +25,7 @@ in a 90\% interval. Note that the intercept for the ABC dataset corresponds to
 Other extraction functions: 
 \code{\link{get_bias}()},
 \code{\link{get_drift}()},
+\code{\link{get_jt_drift}()},
 \code{\link{get_nsvar}()},
 \code{\link{get_parsamps}()},
 \code{\link{get_pars}()},

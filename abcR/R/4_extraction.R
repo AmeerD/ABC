@@ -45,6 +45,30 @@ get_drift <- function(df, raw_mcmc) {
     ungroup
 }
 
+#' Extract joint model long-term drift
+#'
+#' Extracts drift iterations from the model output and summarises the iterations
+#' in a 90\% interval.
+#'
+#' @inheritParams get_muzero
+#'
+#' @return Data frame with columns for country, value, and lower/upper bounds. The
+#'   output does not specify the level and sex combination as it is assumed to be
+#'   known by the user based on the inputs.
+#'
+#' @family extraction functions
+#'
+#' @export
+get_jt_drift <- function(df, raw_mcmc) {
+  raw_mcmc %>%
+    tidybayes::recover_types(df) %>%
+    tidybayes::gather_draws(drift[country, sex]) %>%
+    tidybayes::point_interval(.value, .width = 0.9) %>%
+    #mutate(variable = level, sex = sex) %>%
+    select(country, sex, value = .value, lower = .lower, upper = .upper) %>%
+    ungroup
+}
+
 #' Extract Latent Space Intercept
 #'
 #' Extracts the intercept term from the model output and summarises the iterations

@@ -21,6 +21,7 @@ are excluded. The 9 parameters with the worst Rhats are returned.
 Other extraction functions: 
 \code{\link{get_bias}()},
 \code{\link{get_drift}()},
+\code{\link{get_jt_drift}()},
 \code{\link{get_muzero}()},
 \code{\link{get_nsvar}()},
 \code{\link{get_parsamps}()},

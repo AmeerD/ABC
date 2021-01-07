@@ -24,6 +24,7 @@ about the survey. Note that no summary statistics are computed.
 \seealso{
 Other extraction functions: 
 \code{\link{get_drift}()},
+\code{\link{get_jt_drift}()},
 \code{\link{get_muzero}()},
 \code{\link{get_nsvar}()},
 \code{\link{get_parsamps}()},

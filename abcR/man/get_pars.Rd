@@ -23,6 +23,7 @@ model output, then presents the median and 90 percent intervals for each paramet
 Other extraction functions: 
 \code{\link{get_bias}()},
 \code{\link{get_drift}()},
+\code{\link{get_jt_drift}()},
 \code{\link{get_muzero}()},
 \code{\link{get_nsvar}()},
 \code{\link{get_parsamps}()},
