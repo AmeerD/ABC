@@ -24,6 +24,7 @@ label_values <- c(
 mk_input_plot <- function(input, countries) {
   input %>%
     filter(country %in% countries) %>%
+    country = countrycode::countrycode(country, 'iso3c', 'country.name') %>%
     ggplot(aes(x=year, y=value)) +
     geom_line(aes(group=survey, colour=survey)) +
     geom_point(aes(shape=as.factor(obsage), alpha = -recondist)) +
