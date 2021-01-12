@@ -98,9 +98,9 @@ model {
 
   //Prior Distributions
   sigma_e ~ gamma(2,0.1);
-  to_vector(e_ct) ~ normal(0, sigma_e); //changed from evar
+  to_vector(e_ct) ~ normal(0, sigma_e); 
   muzero ~ normal(0, 10);
-  drift ~ exp_mod_normal(0, 0.025, 2);   //Similar to original code but Exp(1) seems a little too vague
+  drift ~ exp_mod_normal(0, 0.025, 2);   
   beta_s_unif ~ uniform(-pi()/2, pi()/2);
   late_short ~ normal(0, 0.25); //gamma(0.5, 1);
   vlate_short ~ normal(0, 0.25); //gamma(0.25, 1);
