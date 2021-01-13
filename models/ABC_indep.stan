@@ -129,23 +129,23 @@ model {
 generated quantities {
   vector[n_country] late;
   vector[n_country] vlate;
-  vector[n] yhat;
-  vector[n] yrepl;
-  vector[n] ll;
+  //vector[n] yhat;
+  //vector[n] yrepl;
+  //vector[n] ll;
   
   for (i in 1:n_country){
     late[i] = late_short2[lateidx[i]];
     vlate[i] = vlate_short2[vlateidx[i]];
   }
   
-  for(i in 1:n){
-    real sd_total = sqrt(se_q2[i]^2 + reconvar[i]*sigma_s[survey[i]]^2);
+  //for(i in 1:n){
+  //  real sd_total = sqrt(se_q2[i]^2 + reconvar[i]*sigma_s[survey[i]]^2);
     
-    yhat[i] = mu_ct[country[i], year[i]] + beta_s[survey[i]] 
-    + vlate_short2[vlateidx[country[i]]] * recondist3[i] - late_short2[lateidx[country[i]]] .* halfobsage[i]
-    - mult5err[country[i]] * truage5mlt[i];
+  //  yhat[i] = mu_ct[country[i], year[i]] + beta_s[survey[i]] 
+  //  + vlate_short2[vlateidx[country[i]]] * recondist3[i] - late_short2[lateidx[country[i]]] .* halfobsage[i]
+  //  - mult5err[country[i]] * truage5mlt[i];
     
-    yrepl[i] = normal_rng(yhat[i], sd_total);
-    ll[i] = normal_lpdf(value[i] | yhat[i], sd_total);
-  }
+  //  yrepl[i] = normal_rng(yhat[i], sd_total);
+  //  ll[i] = normal_lpdf(value[i] | yhat[i], sd_total);
+  //}
 }
