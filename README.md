@@ -11,7 +11,7 @@ The purpose of this repository is to consolidate the school completion rate anal
 * Aggregation functions to combine country level output into region or income group level output.
 * Plotting functions for various visualisations.
 
-In addition to the `abcR` package, the ABC Stan file is provided along with a sample dataset. 
+In addition to the `abcR` package, the ABC Stan file is provided along with a sample dataset and test script to guide users in how to use the provided functions. For a more involved example, the [drake](https://github.com/ropensci/drake) plans used in the actual modelling pipeline are provided [here](https://github.com/AmeerD/ABC/tree/main/scripts/sample_plans.R).
 
 ## Package Installation
 
@@ -23,4 +23,4 @@ library(abcR)
 
 ## Sample Data
 
-We provide a sample dataset in the [data](https://github.com/AmeerD/ABC/tree/main/data) folder to illustrate the mechanisms of the model. Note that due to data sharing policies, the presented data contains ten anonymised countries and random noise has been added to all observed values. The magnitude of this error exceeds the sampling variation for a great majority of the data points. Readers may experiment with this data using the ABCtest.R script in the [scripts](https://github.com/AmeerD/ABC/tree/main/scripts) folder. This folder also contains the [drake](https://github.com/ropensci/drake) plans used in the actual modelling pipeline.
+We provide a sample dataset in the [data](https://github.com/AmeerD/ABC/tree/main/data) folder to illustrate the mechanisms of the model. Note that due to data sharing policies, the presented data contains ten anonymised countries and random noise has been added to all observed values. The magnitude of this error exceeds the sampling variation for a great majority of the data points. Readers may experiment with this data using the ABCtest.R script in the [scripts](https://github.com/AmeerD/ABC/tree/main/scripts) folder. 
