@@ -102,11 +102,11 @@ model {
   muzero ~ normal(0, 10);
   drift ~ exp_mod_normal(0, 0.025, 2);   
   beta_s_unif ~ uniform(-pi()/2, pi()/2);
-  late_short ~ normal(0, 0.25); //gamma(0.5, 1);
-  vlate_short ~ normal(0, 0.25); //gamma(0.25, 1);
+  late_short ~ normal(0, 0.25); 
+  vlate_short ~ normal(0, 0.25); 
   mult5err ~ exponential(10);
   sigma_beta_s ~ normal(0, 0.25);
-  sigma_s ~ gamma(2, 4); //CHANGED FROM Gamma(2,1)
+  sigma_s ~ gamma(2, 4); 
   
   //Data Generation
   {
