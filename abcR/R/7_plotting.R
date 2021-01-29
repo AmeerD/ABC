@@ -1,5 +1,6 @@
 # Local lookup table for plotting
 label_values <- c(
+  "four" = "Four Years",
   "prim" = "Primary",
   "lsec" = "Lower Secondary",
   "usec" = "Upper Secondary",

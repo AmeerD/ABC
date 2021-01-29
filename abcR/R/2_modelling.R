@@ -91,7 +91,7 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     tidybayes::compose_data() %>%
     within(., {
       year = year - baseyear
-      nyears = lubridate::year(Sys.Date()) + 5 - baseyear
+      nyears = 2025 - baseyear
       survey_count = data.frame(country, survey) %>%
         distinct() %>%
         count(country) %>%
@@ -215,7 +215,7 @@ mdl_core <- function(data, chain_nr, init = 'random', model, nchains, nburn, nit
     warmup = nburn,
     iter   = nburn + niter,
     thin   = nthin,
-    control = list(adapt_delta = 0.8, max_treedepth = 10),
+    control = list(adapt_delta = 0.8, max_treedepth = 15),
     #model_code = model
   )
   return(mod)
