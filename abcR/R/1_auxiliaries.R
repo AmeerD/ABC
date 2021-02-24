@@ -124,12 +124,11 @@ wide_aggregate_by_cats <- function(df, cs, estimate_se = FALSE) {
 
   df %>%
     group_by(!!! cats, country, year, survey, round, variable, cluster) %>%
+    filter(!is.na(value)) %>%
     summarise(
       value = weighted.mean(value, weight, na.rm = TRUE),
       weight = sum(weight, na.rm = TRUE)
     ) %>%
-    filter(!is.na(value)) %>%
-    filter(!is.na(weight)) %>%
     nest %>%
     mutate(data = purrr::map(data, ~ wide_jk(., estimate_se))) %>%
     unnest %>%
