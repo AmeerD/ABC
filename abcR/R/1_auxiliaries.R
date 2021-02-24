@@ -83,7 +83,7 @@ load_raw <- function(o_name, d_name) {suppressWarnings({
 #' @export
 wide_jk <- function(d, estimate_se = FALSE) {
 
-  fun <- function(x) {(0.5 + sum(x$value * x$weight))/(1 + sum(x$weight)) #Beta(0.5,0.5) prior
+  fun <- function(x) {(0.5 + sum(x$value * x$weight, na.rm=TRUE))/(1 + sum(x$weight, na.rm=TRUE)) #Beta(0.5,0.5) prior
     #weighted.mean(x$value, x$weight, na.rm = TRUE)
     }
   within(data.frame(value = fun(d)), {
@@ -93,9 +93,9 @@ wide_jk <- function(d, estimate_se = FALSE) {
       k        <- nrow(jk)
       # jk_ests  <- map_dbl(jk$sample, ~fun(as.data.frame(.)))
       jk_ests  <- purrr::map_dbl(jk$train, ~fun(as.data.frame(.)))
-      se   <- sqrt(sum(((k-1) * value - (k - 1) * jk_ests)^2) / (k * (k - 1)))
-      alph <- 0.5 + sum(d$value * d$weight)
-      beta <- 1 + sum(d$weight)
+      se   <- sqrt(sum(((k-1) * value - (k - 1) * jk_ests)^2, na.rm=TRUE) / (k * (k - 1)))
+      alph <- 0.5 + sum(d$value * d$weight, na.rm=TRUE)
+      beta <- 0.5 + sum(d$weight, na.rm=TRUE) - sum(d$value * d$weight, na.rm=TRUE)
       se_b <- sqrt((alph*beta)/((alph + beta)^2 * (alph + beta + 1)))
       #se_q <- sqrt(sum(((k-1) * qnorm(value) - (k - 1) * qnorm(jk_ests))^2) / (k * (k - 1)))
       rm(jk, k, jk_ests, alph, beta)
