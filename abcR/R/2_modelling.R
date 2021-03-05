@@ -126,6 +126,12 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
         arrange(country) %>%
         select(haslate) %>%
         pull()
+      average = data.frame(country, value) %>%
+        group_by(country) %>%
+        summarise(avg = mean(value)) %>%
+        arrange(country) %>%
+        select(avg) %>%
+        pull()
     })
 }
 
