@@ -170,7 +170,7 @@ whitelist <- function(df) {
                           'HUNCensus2001',
                           'ROUCensus2011',
                           'BLRCensus2009') & recondist <= 0),
-          !(variable == 'prim' & (
+          !((variable %in% c('prim', 'four')) & (
             (survey %in% c('CANCensus2011', 'SDNCensus2008', 'SSDMICS2000', 'URYCensus2006',
                            'FRACensus2006', 'FRACensus2011', 'LTUSILC2013', 'BGRSILC2013',
                            'BELSILC2013', 'LVASILC2005'
