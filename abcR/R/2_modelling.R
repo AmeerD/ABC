@@ -133,6 +133,13 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
         arrange(country) %>%
         select(avg) %>%
         pull()
+      varcat = data.frame(country, value) %>%
+        group_by(country) %>%
+        summarise(mi = min(value), ma = max(value)) %>%
+        mutate(vc = ifelse(mi<=-2.5 | ma >= 2.5, 2, 1)) %>%
+        arrange(country) %>%
+        select(vc) %>%
+        pull()
     })
 }
 
