@@ -135,8 +135,8 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
         pull()
       varcat = data.frame(country, value) %>%
         group_by(country) %>%
-        summarise(mi = min(value), ma = max(value)) %>%
-        mutate(vc = ifelse(mi<=-2.5 | ma >= 2.5, 2, 1)) %>%
+        summarise(mn = mean(value), md = median(value)) %>%
+        mutate(vc = ifelse(mn<=-2.5 | mn >= 2.5 | md<=-2.5 | md >= 2.5, 2, 1)) %>%
         arrange(country) %>%
         select(vc) %>%
         pull()
