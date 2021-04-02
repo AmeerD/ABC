@@ -68,8 +68,8 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     group_by(country) %>%
     mutate(haslate = ifelse(median(value) >= 0.95, 0, 1)) %>%
     mutate(
-      value = value - cap_adj,
-      se_q2 = se/dnorm(qnorm(value))
+      se_q2 = se/dnorm(qnorm(value)),
+      value = value - cap_adj
     ) %>%
     ungroup %>%
 
@@ -80,8 +80,8 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     #ungroup() %>%
     #
     mutate(
-      # year = year - min(year) + 1,
-      value = pmax(-2.5, pmin(2.5, qnorm(value)))#,
+      #year = year - min(year) + 1,
+      #value = pmax(-2.5, pmin(2.5, qnorm(value)))#,
       #se     = case_when(se_q == Inf & !is.na(se_mean) ~ se_mean,
       #                   se_q == Inf & is.na(se_mean) ~ 0.35,
       #                   TRUE        ~ se_q)
