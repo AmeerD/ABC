@@ -81,7 +81,7 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     #
     mutate(
       #year = year - min(year) + 1,
-      #value = pmax(-2.5, pmin(2.5, qnorm(value)))#,
+      value = qnorm(value)#,
       #se     = case_when(se_q == Inf & !is.na(se_mean) ~ se_mean,
       #                   se_q == Inf & is.na(se_mean) ~ 0.35,
       #                   TRUE        ~ se_q)
