@@ -177,13 +177,13 @@ whitelist <- function(df) {
                            # ,'MLTSILC2009' ##NEW ADDITION
             )) |
               (survey %in% c('LVASILC2005', 'MNGMICS2000', 'POLCensus2002', 'CHNCensus2000',
-                             'FRASILC2017') & obsage > 0) |
+                             'FRASILC2017', 'TURCensus2000') & obsage > 0) |
               (survey %in% c('TTOMICS2011') & recondist > 10)
           )),
           !(variable == 'lsec' & ((survey %in% c('ALBDHS2009', 'ARMDHS2000', 'CANCensus2011', 'CHESILC2009',
                                                  'KENCensus2009', 'LVASILC2005', 'SDNCensus2008', 'SSDMICS2000', 'SVNSILC2005',
                                                  'VENMICS2000')) |
-                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012') & obsage > 0) |
+                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012', 'TURCensus2000') & obsage > 0) |
                                     (survey %in% c('BIHMICS2011') & recondist > 7)
           )),
           !(variable == 'usec' & ((survey %in% c('ARMDHS2016', 'ARMDHS2000', 'BIHMICS2011', 'EGYDHS2005', 'EGYDHS2014',
