@@ -190,11 +190,11 @@ mdl_compile <- function(model = modelfile) {
 #' @return Initial values for the drift parameter
 init_drift <- function(ncountry, nyears, joint = FALSE) {
   if (joint) {
-    list(struc = runif(ncountry, min = -0.2, max = 0.2),
+    list(struc = runif(ncountry, min = 0, max = 0.2),
          drift = matrix(runif(2*ncountry, min = 0, max = 0.2), ncol=2))
-  } #else {
-    #list(drift = runif(ncountry, min = -0.5, max = 2))
-  #}
+  } else {
+    list(drift = runif(ncountry, min = 0, max = 2))
+  }
 }
 
 #' Execute ABC model.
