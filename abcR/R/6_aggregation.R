@@ -25,14 +25,14 @@ reg_aggs <- function(df, pops) {
 #' @return Data frame summarising aggregations.
 #' @export
 combine_regs <- function(df, regions, pops) {
-  poptemp <- pops %>% 
+  poptemp <- pops %>%
     mutate(series = case_when(
-      series == "cr" ~ "projected3t5", 
-      series == "a5" ~ "projected5", 
-      series == "a8" ~ "projected8", 
+      series == "cr" ~ "projected3t5",
+      series == "a5" ~ "projected5",
+      series == "a8" ~ "projected8",
       TRUE ~ series
     ))
-  
+
   df %>%
     filter(series != 'observed') %>%
     select(-lower, -upper) %>%
@@ -40,23 +40,36 @@ combine_regs <- function(df, regions, pops) {
       variable == "prim" ~ "primary",
       variable == "lsec" ~ "lower secondary",
       variable == "usec" ~ "upper secondary",
+      variable == "four" ~ "four years",
       TRUE ~ ""
     )) %>%
     select(-variable) %>%
     {bind_rows(
       dplyr::left_join(., regions, by = 'country')
       ,
-      mutate(., SDG.region = 'World', income_group = 'World')
+      .
     )} %>%
+    mutate_at(vars(-country, -year, -series, -value, -sex, -level),
+              function(x) ifelse(is.na(x), "World", x)) %>%
     {bind_rows(
-      select(., -SDG.region) %>%
+      select(., -SDG.region, -LDC, -LLDC, -SIDS) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'income'),
-      select(., -income_group) %>%
+      select(., -income_group, -LDC, -LLDC, -SIDS) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'regions'),
-      reg_aggs(., poptemp) %>%
-        mutate(aggregates = 'regionsXincome')
+      select(., -LDC, -LLDC, -SIDS) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'regionsXincome'),
+      select(., -SDG.region, -income_group, -LLDC, -SIDS) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'LDC'),
+      select(., -SDG.region, -income_group, -LDC, -SIDS) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'LLDC'),
+      select(., -SDG.region, -income_group, -LDC, -LLDC) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'SIDS')
     )} %>%
     order_levels
 }
@@ -87,7 +100,7 @@ proj2030 <- function(df, horizon = 10) {
     # mutate(mdk_lift = map2_dbl(mdk, cummax(mdk), ~ p * .x + (1-p) * .y)) %>%
     mutate(mdk_lift = mean(mdk)) %>%
     arrange(aggregates, income_group, SDG.region, series, level)
-  
+
   proj <- df %>%
     group_by(aggregates, income_group, SDG.region, series, level) %>%
     filter(year == 2020) %>%
@@ -107,7 +120,7 @@ proj2030 <- function(df, horizon = 10) {
     select(-mdk, -mdk_lift, -mdk_mix, -weight) %>%
     filter(year > 2020) %>%
     ungroup
-  
+
   df %>%
     filter(year <= 2020) %>%
     bind_rows(proj)
