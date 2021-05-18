@@ -118,7 +118,7 @@ get_bias <- function(df, raw_mcmc, rounds) {
     rename(iteration = .draw, variable = .variable, value = .value) %>%
     mutate(level = (df %>% ungroup %>% select(variable) %>% distinct %>% pull),
            sex = (df %>% ungroup %>% select(sex) %>% distinct %>% pull)) %>%
-    left_join(round %>%
+    left_join(rounds %>%
                 mutate(survey = paste0(country, survey, year)) %>%
                 rename(level = variable),
               by=c("survey", "level"))
