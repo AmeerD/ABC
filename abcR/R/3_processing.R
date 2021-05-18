@@ -194,7 +194,7 @@ loo_influential <- function(df, loo1, threshold = 0.7) {
 #' @export
 loo_pit <- function(df, raw_mcmc, loo1) {
   yrepl <- rstan::extract(raw_mcmc)[["yrepl"]]
-  bayesplot::ppc_loo_pit_overlay(yrep = yrepl, y = qnorm(pmax(0.02, pmin(0.98, df$value))),
+  bayesplot::ppc_loo_pit_overlay(yrep = yrepl, y = qnorm(pmax(pnorm(-2.5), pmin(pnorm(2.5), df$value))),
                                  lw = stats::weights(loo1$psis_object))
 }
 
@@ -210,6 +210,6 @@ loo_pit <- function(df, raw_mcmc, loo1) {
 #' @export
 loo_qq <- function(df, raw_mcmc, loo1) {
   yrepl <- rstan::extract(raw_mcmc)[["yrepl"]]
-  bayesplot::ppc_loo_pit_qq(yrep = yrepl, y = qnorm(pmax(0.02, pmin(0.98, df$value))),
+  bayesplot::ppc_loo_pit_qq(yrep = yrepl, y = qnorm(pmax(pnorm(-2.5), pmin(pnorm(2.5), df$value))),
                             lw = stats::weights(loo1$psis_object), size = 1)
 }
