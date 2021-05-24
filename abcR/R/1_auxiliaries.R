@@ -14,7 +14,7 @@ nonempty_col <- function(c) !all(is.na(c))
 #'
 #' @export
 order_levels <- function(df) {
-  mutate(df, level = ordered(level, levels = c('upper secondary', 'lower secondary', 'primary')))
+  mutate(df, level = ordered(level, levels = c('upper secondary', 'lower secondary', 'primary', 'four years')))
 }
 
 #' Substitute levels with full titles.
