@@ -332,10 +332,10 @@ mk_par_plot <- function(df) {
 mk_reg_plot <- function(df, which_aggs = 'regions', endyr = 2020) {
   plotdat <- df %>%
     filter(year >= 2000 & year <= endyr) %>%
-    filter(!(is.na(SDG.region) & is.na(income_group))) %>%
+    #filter(!(is.na(SDG.region) & is.na(income_group))) %>%
     mutate(income_group = factor(income_group, levels=c("High", "Upper middle", "Lower middle", "Low", "World"))) %>%
     # mutate(income_group = factor(income_group, levels=c("High", "Middle", "Low", "World"))) %>%
-    filter(aggregates == 'income' | SDG.region != 'Oceania') %>%
+    #filter(aggregates == 'income' | SDG.region != 'Oceania') %>%
     filter(aggregates == which_aggs) %>%
     mutate(series = case_when(
       series == "projected8" ~ "Ultimate CR",
@@ -359,6 +359,9 @@ mk_reg_plot <- function(df, which_aggs = 'regions', endyr = 2020) {
   switch(which_aggs,
          regions        = p+facet_wrap(~ SDG.region, ncol = 1),
          income         = p+facet_wrap(~ income_group, ncol = 1),
+         LDC            = p+facet_wrap(~ LDC, ncol=1),
+         LLDC           = p+facet_wrap(~ LLDC, ncol=1),
+         SIDS           = p+facet_wrap(~ SIDS, ncol=1),
          regionsXincome = p+facet_wrap(SDG.region ~ income_group) +
            theme(legend.position = "bottom"))
 }
