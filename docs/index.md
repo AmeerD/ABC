@@ -1,6 +1,6 @@
-## Welcome to GitHub Pages
+## School Completion Rates
 
-<iframe height="800" width="100%" frameborder="no" src="https://ameerd.shinyapps.io/ABCShiny/"> </iframe>
+<iframe height="1000" width="100%" frameborder="no" src="https://ameerd.shinyapps.io/ABCShiny/"> </iframe>
 
 You can use the [editor on GitHub](https://github.com/AmeerD/ABC/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
 
