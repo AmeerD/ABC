@@ -189,7 +189,7 @@ whitelist <- function(df) {
           !(variable == 'usec' & ((survey %in% c('ARMDHS2016', 'ARMDHS2000', 'BIHMICS2011', 'EGYDHS2005', 'EGYDHS2014',
                                                  'KAZMICS2006', 'MDAMICS2000', 'NORSILC2009', 'NORSILC2013', 'POLCensus2002',
                                                  'POLCensus2011', 'SDNCensus2008', 'SRBSILC2013', 'SSDMICS2000', 'UKRCensus2001',
-                                                 'KGZCensus2009', 'KAZMICS2006', 'BLRCensus2009',
+                                                 'KGZCensus2009', 'KAZMICS2006', 'BLRCensus2009', 'NPLDHS2011', 'NPLDHS2016',
                                                  'CHLCASEN2000', 'CHLCASEN2011', 'CHLCASEN2013', 'CHLCASEN2015')) |
                                     (survey %in% c('BELSILC2017') & obsage > 0) |
                                     (survey %in% c('KENDHS2003', 'TJKMICS2005') & recondist > 7) |
