@@ -229,7 +229,7 @@ mdl_core <- function(data, chain_nr, init = 'random', model, nchains, nburn, nit
     warmup = nburn,
     iter   = nburn + niter,
     thin   = nthin,
-    control = list(adapt_delta = 0.8, max_treedepth = 12),
+    control = list(adapt_delta = 0.85, max_treedepth = 12),
     #model_code = model
   )
   return(mod)
