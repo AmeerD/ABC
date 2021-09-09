@@ -175,7 +175,7 @@ whitelist <- function(df) {
                            'FRACensus2006', 'FRACensus2011', 'LTUSILC2013', 'BGRSILC2013',
                            'BELSILC2013', 'LVASILC2005',
                            #Sept 9, 2021 additions
-                           'NPLMICS2010', 'NPLMICS2019'
+                           'NPLMICS2010', 'NPLMICS2019', 'LAOMICS2011', 'LAOMICS2017', 'ZWEMICS2014'
                            # ,'MLTSILC2009' ##NEW ADDITION
             )) |
               (survey %in% c('LVASILC2005', 'MNGMICS2000', 'POLCensus2002', 'CHNCensus2000',
@@ -186,7 +186,8 @@ whitelist <- function(df) {
                                                  'KENCensus2009', 'LVASILC2005', 'SDNCensus2008', 'SSDMICS2000', 'SVNSILC2005',
                                                  'VENMICS2000',
                                                  #Sept 9, 2021 additions
-                                                 'NPLMICS2010', 'NPLMICS2019', 'TKMMICS2019', 'ALBDHS2017')) |
+                                                 'NPLMICS2010', 'NPLMICS2019', 'TKMMICS2019', 'ALBDHS2017', 'CMRMICS2014',
+                                                 'LAOMICS2011', 'LAOMICS2017', 'ZWEMICS2014')) |
                                     (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012', 'TURCensus2000') & obsage > 0) |
                                     (survey %in% c('BIHMICS2011') & recondist > 7)
           )),
@@ -196,7 +197,8 @@ whitelist <- function(df) {
                                                  'KGZCensus2009', 'KAZMICS2006', 'BLRCensus2009', 'NPLDHS2011', 'NPLDHS2016',
                                                  'CHLCASEN2000', 'CHLCASEN2011', 'CHLCASEN2013', 'CHLCASEN2015',
                                                  #Sept 9, 2021 additions
-                                                 'NPLMICS2010', 'NPLMICS2019', 'TKMMICS2019')) |
+                                                 'NPLMICS2010', 'NPLMICS2019', 'TKMMICS2019', 'CMRMICS2014',
+                                                 'LAOMICS2011', 'LAOMICS2017', 'ZWEMICS2014')) |
                                     (survey %in% c('BELSILC2017') & obsage > 0) |
                                     (survey %in% c('KENDHS2003', 'TJKMICS2005') & recondist > 7) |
                                     (survey %in% c('TKMMICS2006', 'TKMMICS2015') & year >= 2002 & year <= 2014)
