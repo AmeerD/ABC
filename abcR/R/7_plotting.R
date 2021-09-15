@@ -295,21 +295,19 @@ mk_par_plot <- function(df) {
     mutate(parameter = factor(parameter, levels = c('beta_s', 'late', 'vlate', 'mult5err'),
                               labels = c('survey bias', 'late completion', 'very late completion', 'age misreporting')),
            level = factor(level, levels = c('prim', 'lsec', 'usec'),
-                          labels = c("Primary", "Lower Secondary", "Upper Secondary"))
+                          labels = c("Primary", "Lower Secondary", "Upper Secondary")),
+           sex = factor(sex, levels = c('female', 'male', 'total'),
+                        labels = c("Female", "Male", "Total"))
     ) %>%
-    mutate(value = case_when(
-      parameter == 'very late completion' ~ value,
-      parameter == 'late completion' ~ value/2,
-      TRUE ~ value
-    )) %>%
-    ggplot(data = ., aes(x = parameter, y = value, colour = level))+
-    geom_boxplot(width = .3)+
+    ggplot(data = ., aes(x = parameter, y = value, colour = interaction(level, sex)))+
+    geom_boxplot(width = .75)+
     theme_minimal()+
     geom_hline(yintercept = 0, size = .2)+
     # scale_y_continuous(limits = c(-.5, .5))+
     scale_colour_brewer(type = 'qual', palette = 'Set1')+
     coord_flip() +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    guides(colour = guide_legend(nrow = 3))
 }
 
 #' Plot ABC Results by Region
