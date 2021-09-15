@@ -42,8 +42,8 @@ mdl_process <- function(df, raw_mcmc) {
     arrange(year) %>%
     mutate(
       mu5.ct = mu_ct,
-      mu4.ct = dplyr::lead(mu_ct, 1) - late/2,
-      mu3.ct = dplyr::lead(mu_ct, 2) - late,
+      mu4.ct = dplyr::lead(mu_ct, 1) - late,
+      mu3.ct = dplyr::lead(mu_ct, 2) - 2*late,
       mu8.ct = mu_ct + vlate * 3
     ) %>%
     select(-mu_ct, -late, -vlate) %>%
@@ -113,8 +113,8 @@ mdl_jt_process <- function(df, raw_mcmc, props) {
     arrange(year) %>%
     mutate(
       mu5.ct = mu_ct,
-      mu4.ct = dplyr::lead(mu_ct, 1) - late/2,
-      mu3.ct = dplyr::lead(mu_ct, 2) - late,
+      mu4.ct = dplyr::lead(mu_ct, 1) - late,
+      mu3.ct = dplyr::lead(mu_ct, 2) - 2*late,
       mu8.ct = mu_ct + vlate * 3
     ) %>%
     select(-mu_ct, -late, -vlate) %>%
