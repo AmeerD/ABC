@@ -91,7 +91,7 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     tidybayes::compose_data() %>%
     within(., {
       year = year - baseyear
-      nyears = 2025 - baseyear
+      nyears = lubridate::year(Sys.Date()) + 5 - baseyear #2025 - baseyear
       survey_count = data.frame(country, survey) %>%
         distinct() %>%
         count(country) %>%
