@@ -52,22 +52,29 @@ combine_regs <- function(df, regions, pops) {
     mutate_at(vars(-country, -year, -series, -value, -sex, -level),
               function(x) ifelse(is.na(x), "World", x)) %>%
     {bind_rows(
-      select(., -SDG.region, -LDC, -LLDC, -SIDS) %>%
+      select(., -SDG.region, -LDC, -LLDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
+        {bind_rows(
+          .,
+          filter(., income_group %in% c("Low", "Lower middle")) %>% mutate(Income = "Low and lower middle")
+        )} %>%
         mutate(aggregates = 'income'),
-      select(., -income_group, -LDC, -LLDC, -SIDS) %>%
+      select(., -income_group, -LDC, -LLDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'regions'),
-      select(., -LDC, -LLDC, -SIDS) %>%
+      select(., -LDC, -LLDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'regionsXincome'),
-      select(., -SDG.region, -income_group, -LLDC, -SIDS) %>%
+      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'continent'),
+      select(., -SDG.region, -income_group, -LLDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'LDC'),
-      select(., -SDG.region, -income_group, -LDC, -SIDS) %>%
+      select(., -SDG.region, -income_group, -LDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'LLDC'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC) %>%
+      select(., -SDG.region, -income_group, -LDC, -LLDC, -continent) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'SIDS')
     )} %>%
