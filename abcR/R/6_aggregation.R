@@ -53,11 +53,11 @@ combine_regs <- function(df, regions, pops) {
               function(x) ifelse(is.na(x), "World", x)) %>%
     {bind_rows(
       select(., -SDG.region, -LDC, -LLDC, -SIDS, -continent) %>%
-        reg_aggs(poptemp) %>%
         {bind_rows(
           .,
           filter(., income_group %in% c("Low", "Lower middle")) %>% mutate(income_group = "Low and lower middle")
         )} %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'income'),
       select(., -income_group, -LDC, -LLDC, -SIDS, -continent) %>%
         reg_aggs(poptemp) %>%
