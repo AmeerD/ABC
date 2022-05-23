@@ -559,10 +559,11 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
           select(country) %>% 
           pull
       
-        data[["sigma_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+        temp3 <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
         for (i in 1:data[["n_survey"]]) {
-          data[["sigma_s"]][:, i] <- temp1[:, temp2[i]]
+          temp3[, i] <- temp1[, temp2[i]]
         }
+        data[["sigma_s"]] <- temp3
         data[["beta_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
       } else {
         data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
