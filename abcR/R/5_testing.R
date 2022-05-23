@@ -531,17 +531,44 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
 
     #Append parameter samples
     data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
-    data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
-    data[["late"]] <- get_parsamps(raw_mcmc, "late")
-    data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate")
-    data[["iters"]] <- dim(data[["late"]])[1]
+    data[["iters"]] <- dim(data[["mu_ct"]])[1]
+    data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% replace_na(0)
+    data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% replace_na(0)
     data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
-
+    data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
+    if (is.null(data[["mult5err"]])) {
+      data[["mult5err"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_country"]])
+    }
+    
     if (type == "lso") {
-      data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+      if (is.null(get_parsamps(raw_mcmc, "sigma_s"))) {
+        data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_c")
+      } else {
+        data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+      }
     } else {
-      data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
-      data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+      if (is.null(get_parsamps(raw_mcmc, "sigma_s"))) {
+        temp1 <- get_parsamps(raw_mcmc, "sigma_c")
+        temp2 <- bind_rows(input %>% mutate(test = 0),
+                           testset %>% mutate(test = 1)) %>%
+          ungroup %>%
+          select(country, survey) %>%
+          distinct %>%
+          arrange(survey) %>%
+          mutate(country = as.numeric(as.factor(country))) %>%
+          select(country) %>% 
+          pull
+      
+        data[["sigma_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+        for (i in 1:data[["n_survey"]]) {
+          data[["sigma_s"]][:, i] <- temp1[:, temp2[i]]
+        }
+        data[["beta_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+      } else {
+        data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
+        data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+      }
+      
     }
 
 
