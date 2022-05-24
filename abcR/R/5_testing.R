@@ -220,7 +220,7 @@ test_abc2 <- function(input, tests, raw_mcmc, model, type) {
     if (is.null(data[["sigma_s"]])) {
       temp1 <- get_parsamps(raw_mcmc, "sigma_c")
       temp2 <- bind_rows(input %>% mutate(test = 0),
-                         testss %>% mutate(test = 1)) %>%
+                         tests %>% mutate(test = 1)) %>%
         ungroup %>%
         select(country, survey) %>%
         distinct %>%
