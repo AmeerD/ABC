@@ -2,25 +2,31 @@
 % Please edit documentation in R/5_testing.R
 \name{test_abc2}
 \alias{test_abc2}
-\title{Survey level ABC test.}
+\title{Model-based ABC test.}
 \usage{
-test_abc2(input, tests, mcmc)
+test_abc2(input, tests, raw_mcmc, model, type)
 }
 \arguments{
 \item{input}{Input set data frame.}
 
 \item{tests}{Test set data frame.}
 
-\item{mcmc}{Raw ABC MCMC output.}
+\item{raw_mcmc}{Raw Stan model output.}
+
+\item{model}{Generated quantities model.}
+
+\item{type}{Test type.}
 }
 \value{
 Returns a summary table with the model performance.
 }
 \description{
 \code{test_abc2} uses the results of the ABC model executed using the input
-set to estimate the completion rate indicator of the observation year of
-each survey in the test set. The differences are summarised by the mean
-squared error, mean absolute deviation, and median absolute deviation.
+set to estimate the observations described by the test set. The differences
+are summarised by the mean squared error, mean absolute deviation, and
+median absolute deviation. Unlike \code{test_abc}, this function uses a
+Stan model's generated quantities block to execute tests instead of
+relying on posterior sample manipulation.
 }
 \seealso{
 Other testing functions: 

@@ -130,23 +130,27 @@ test_abc <- function(input, tests, mcmc) {
     select(model, level = variable, sex, everything())
 }
 
-#' Survey level ABC test.
+#' Model-based ABC test.
 #'
 #' \code{test_abc2} uses the results of the ABC model executed using the input
-#' set to estimate the completion rate indicator of the observation year of
-#' each survey in the test set. The differences are summarised by the mean
-#' squared error, mean absolute deviation, and median absolute deviation.
+#' set to estimate the observations described by the test set. The differences
+#' are summarised by the mean squared error, mean absolute deviation, and
+#' median absolute deviation. Unlike \code{test_abc}, this function uses a
+#' Stan model's generated quantities block to execute tests instead of
+#' relying on posterior sample manipulation.
 #'
 #' @param input Input set data frame.
 #' @param tests Test set data frame.
-#' @param mcmc Raw ABC MCMC output.
+#' @param raw_mcmc Raw Stan model output.
+#' @param model Generated quantities model.
+#' @param type Test type.
 #'
 #' @family testing functions
 #'
 #' @return Returns a summary table with the model performance.
 #'
 #' @export
-test_abc2 <- function(input, tests, mcmc) {
+test_abc2 <- function(input, tests, raw_mcmc, model, type) {
   if (nrow(tests) == 0) {
     empty <- input %>%
       select(variable, sex) %>%
@@ -175,31 +179,79 @@ test_abc2 <- function(input, tests, mcmc) {
            halfobsage = obsage/2) %>%
     select(-obsage)
 
-  mcmc %>%
-    tidybayes::recover_types(input) %>%
-    tidybayes::spread_draws(
-      mu_ct[country, year],
-      late[country],
-      vlate[country],
-      mult5err[country]
-    ) %>%
-    ungroup %>%
-    mutate(year = year + baseyear) %>%
-    select(-.iteration, -.chain) %>%
-    rename(iteration = .draw) %>%
-    inner_join(tsmall, by = c("country", "year")) %>%
+  print(model)
+
+  data <- bind_rows(input %>% mutate(test = 0),
+                    testset %>% mutate(test = 1)) %>%
+    mdl_prep()
+
+  idx <- data[["test"]] == 1
+
+  #Remove train data
+  data[["n"]] <- sum(data[["test"]])
+  data[["year"]] <- data[["year"]][idx]
+  data[["country"]] <- data[["country"]][idx]
+  data[["survey"]] <- data[["survey"]][idx]
+  data[["obsage"]] <- data[["obsage"]][idx]
+  data[["recondist"]] <- data[["recondist"]][idx]
+  data[["truage5mlt"]] <- data[["truage5mlt"]][idx]
+  data[["se_q2"]] <- data[["se_q2"]][idx]
+  data[["value"]] <- data[["value"]][idx]
+
+  #Append parameter samples
+  data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
+  data[["iters"]] <- dim(data[["mu_ct"]])[1]
+  data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% replace_na(0)
+  data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% replace_na(0)
+  data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
+  data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
+  if (is.null(data[["mult5err"]])) {
+    data[["mult5err"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_country"]])
+  }
+
+  if (type == "lso") {
+    if (is.null(get_parsamps(raw_mcmc, "sigma_s"))) {
+      data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_c")
+    } else {
+      data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
+    }
+  } else {
+    data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
+    if (is.null(data[["sigma_s"]])) {
+      temp1 <- get_parsamps(raw_mcmc, "sigma_c")
+      temp2 <- bind_rows(input %>% mutate(test = 0),
+                         testset %>% mutate(test = 1)) %>%
+        ungroup %>%
+        select(country, survey) %>%
+        distinct %>%
+        arrange(survey) %>%
+        mutate(country = as.numeric(as.factor(country))) %>%
+        select(country) %>%
+        pull
+
+      temp3 <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+      for (i in 1:data[["n_survey"]]) {
+        temp3[, i] <- temp1[, temp2[i]]
+      }
+      data[["sigma_s"]] <- temp3
+    }
+
+    data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+    if (is.null(data[["beta_s"]])) {
+      data[["beta_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+    }
+
+  }
+
+  mod <- stan(model, seed = 2020, chains = 1, data = data,
+              warmup = 0, iter = 10, algorithm = "Fixed_param")
+
+  bind_cols(
+    tsmall,
+    rstan::summary(mod, pars=c("yhat"), probs=c("0.5"))$summary %>% as.data.frame
+  ) %>%
     left_join(lookup, by = c("country")) %>%
-    mutate(pred = mu_ct + vlate * recondist3 - late * halfobsage - mult5err * truage5mlt,
-           pred = pmax(pmin(pnorm(pred) + cap_adj, 1), 0)) %>%
-    select(country, year, iteration, value, pred, recondist) %>%
-    group_by(country, year, value, recondist) %>%
-    tidybayes::point_interval(pred, .width = 0.9) %>%
-    ungroup %>%
-    select(-.width, -.point, -.interval) %>%
-    rename(lower = .lower, upper = .upper) %>%
-    filter(recondist == min(recondist)) %>%
-    group_by(country) %>%
-    summarise(value = mean(value), pred = mean(pred)) %>%
+    mutate(pred = pmax(pmin(pnorm(`50%`) + cap_adj, 1), 0)) %>%
     mutate(diff = pred - value, diff_sq = diff^2) %>%
     summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
               mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
@@ -207,6 +259,39 @@ test_abc2 <- function(input, tests, mcmc) {
               mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
     mutate(model = "ABC", variable = variable, sex = sex) %>%
     select(model, level = variable, sex, everything())
+
+  # mcmc %>%
+  #   tidybayes::recover_types(input) %>%
+  #   tidybayes::spread_draws(
+  #     mu_ct[country, year],
+  #     late[country],
+  #     vlate[country],
+  #     mult5err[country]
+  #   ) %>%
+  #   ungroup %>%
+  #   mutate(year = year + baseyear) %>%
+  #   select(-.iteration, -.chain) %>%
+  #   rename(iteration = .draw) %>%
+  #   inner_join(tsmall, by = c("country", "year")) %>%
+  #   left_join(lookup, by = c("country")) %>%
+  #   mutate(pred = mu_ct + vlate * recondist3 - late * halfobsage - mult5err * truage5mlt,
+  #          pred = pmax(pmin(pnorm(pred) + cap_adj, 1), 0)) %>%
+  #   select(country, year, iteration, value, pred, recondist) %>%
+  #   group_by(country, year, value, recondist) %>%
+  #   tidybayes::point_interval(pred, .width = 0.9) %>%
+  #   ungroup %>%
+  #   select(-.width, -.point, -.interval) %>%
+  #   rename(lower = .lower, upper = .upper) %>%
+  #   filter(recondist == min(recondist)) %>%
+  #   group_by(country) %>%
+  #   summarise(value = mean(value), pred = mean(pred)) %>%
+  #   mutate(diff = pred - value, diff_sq = diff^2) %>%
+  #   summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
+  #             mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
+  #             mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
+  #             mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
+  #   mutate(model = "ABC", variable = variable, sex = sex) %>%
+  #   select(model, level = variable, sex, everything())
 }
 
 #' Test model on new data
