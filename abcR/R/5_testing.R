@@ -209,290 +209,6 @@ test_abc2 <- function(input, tests, mcmc) {
     select(model, level = variable, sex, everything())
 }
 
-#' Observation level simple model test.
-#'
-#' \code{alt1_smpl2} uses the results of a simple linear model in the probit
-#' space estimated using the input set to estimate the observations described
-#' by the test set. The differences are summarised by the mean squared error,
-#' mean absolute deviation, and median absolute deviation.
-#'
-#' @param input Input set data frame.
-#' @param tests Test set data frame.
-#'
-#' @family testing functions
-#'
-#' @return Returns a summary table with the model performance.
-#'
-#' @export
-alt1_smpl2 <- function(input, tests) {
-  if (nrow(tests) == 0) {
-    empty <- input %>%
-      select(variable, sex) %>%
-      distinct %>%
-      mutate(model = "ABC",
-             mse.100 = NA,
-             mae.100 = NA,
-             mbe.100 = NA,
-             mmad.100 = NA) %>%
-      select(model, everything()) %>%
-      rename(level = variable)
-    return(empty)
-  }
-
-  df <- bind_rows(input %>% mutate(class = "train"),
-                  tests %>% mutate(class = "test"))
-
-  smpl <- function(x) {
-    mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ year)
-    x %>%
-      filter(class == "test") %>%
-      mutate(value = qnorm(value)) %>%
-      {mutate(., pred = predict(mod, type = 'response', newdata = .))} %>%
-      mutate(value = pnorm(value), pred = pnorm(pred)) %>%
-      select(-class)
-  }
-
-  df %>%
-    group_by(country, variable, sex) %>%
-    nest() %>%
-    mutate(data = purrr::map(data, smpl)) %>%
-    unnest(data) %>%
-    ungroup() %>%
-    mutate(diff = pred - value, diff_sq = diff^2) %>%
-    group_by(variable, sex) %>%
-    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
-              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
-              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
-    mutate(model = "simple", variable = variable, sex = sex) %>%
-    select(model, level = variable, sex, everything())
-}
-
-#' Survey level simple model test.
-#'
-#' \code{alt1_smpl3} uses the results of a simple linear model in the probit
-#' space estimated using the input set to estimate the completion rate indicator
-#' of the observation year of each survey in the test set. The differences are
-#' summarised by the mean squared error, mean absolute deviation, and median
-#' absolute deviation.
-#'
-#' @param input Input set data frame.
-#' @param tests Test set data frame.
-#'
-#' @family testing functions
-#'
-#' @return Returns a summary table with the model performance.
-#'
-#' @export
-alt1_smpl3 <- function(input, tests) {
-  if (nrow(tests) == 0) {
-    empty <- input %>%
-      select(variable, sex) %>%
-      distinct %>%
-      mutate(model = "ABC",
-             mse.100 = NA,
-             mae.100 = NA,
-             mbe.100 = NA,
-             mmad.100 = NA) %>%
-      select(model, everything()) %>%
-      rename(level = variable)
-    return(empty)
-  }
-
-  df <- bind_rows(input %>% mutate(class = "train"),
-                  tests %>% mutate(class = "test"))
-
-  smpl <- function(x) {
-    mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ year)
-    x %>%
-      filter(class == "test") %>%
-      mutate(value = qnorm(value)) %>%
-      {mutate(., pred = predict(mod, type = 'response', newdata = .))} %>%
-      mutate(value = pnorm(value), pred = pnorm(pred)) %>%
-      select(-class)
-  }
-
-  df %>%
-    group_by(country, variable, sex) %>%
-    nest() %>%
-    mutate(data = purrr::map(data, smpl)) %>%
-    unnest(data) %>%
-    ungroup() %>%
-    group_by(country, variable, sex) %>%
-    filter(recondist == min(recondist)) %>%
-    summarise(pred = mean(pred), value = mean(value)) %>%
-    mutate(diff = pred - value, diff_sq = diff^2) %>%
-    group_by(variable, sex) %>%
-    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
-              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
-              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
-    mutate(model = "simple", variable = variable, sex = sex) %>%
-    select(model, level = variable, sex, everything())
-}
-
-#' Observation level flat model test.
-#'
-#' \code{alt2_flat2} uses the results of an intercept only model in the probit
-#' space estimated using the input set to estimate the observations described
-#' by the test set. The differences are summarised by the mean squared error,
-#' mean absolute deviation, and median absolute deviation.
-#'
-#' @param input Input set data frame.
-#' @param tests Test set data frame.
-#'
-#' @family testing functions
-#'
-#' @return Returns a summary table with the model performance.
-#'
-#' @export
-alt2_flat2 <- function(input, tests) {
-  if (nrow(tests) == 0) {
-    empty <- input %>%
-      select(variable, sex) %>%
-      distinct %>%
-      mutate(model = "ABC",
-             mse.100 = NA,
-             mae.100 = NA,
-             mbe.100 = NA,
-             mmad.100 = NA) %>%
-      select(model, everything()) %>%
-      rename(level = variable)
-    return(empty)
-  }
-
-  df <- bind_rows(input %>% mutate(class = "train"),
-                  tests %>% mutate(class = "test"))
-
-  flat <- function(x) {
-    mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ 1)
-    x %>%
-      filter(class == "test") %>%
-      mutate(value = qnorm(value)) %>%
-      {mutate(., pred = predict(mod, type = 'response', newdata = .))} %>%
-      mutate(value = pnorm(value), pred = pnorm(pred)) %>%
-      select(-class)
-  }
-
-  df %>%
-    group_by(country, variable, sex) %>%
-    nest() %>%
-    mutate(data = purrr::map(data, flat)) %>%
-    unnest(data) %>%
-    ungroup() %>%
-    mutate(diff = pred - value, diff_sq = diff^2) %>%
-    group_by(variable, sex) %>%
-    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
-              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
-              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
-    mutate(model = "flat", variable = variable, sex = sex) %>%
-    select(model, level = variable, sex, everything())
-}
-
-#' Survey level flat model test.
-#'
-#' \code{alt2_flat3} uses the results of an intercept only model in the probit
-#' space estimated using the input set to estimate the completion rate indicator
-#' of the observation year of each survey in the test set. The differences are
-#' summarised by the mean squared error, mean absolute deviation, and median
-#' absolute deviation.
-#'
-#' @param input Input set data frame.
-#' @param tests Test set data frame.
-#'
-#' @family testing functions
-#'
-#' @return Returns a summary table with the model performance.
-#'
-#' @export
-alt2_flat3 <- function(input, tests) {
-  if (nrow(tests) == 0) {
-    empty <- input %>%
-      select(variable, sex) %>%
-      distinct %>%
-      mutate(model = "ABC",
-             mse.100 = NA,
-             mae.100 = NA,
-             mbe.100 = NA,
-             mmad.100 = NA) %>%
-      select(model, everything()) %>%
-      rename(level = variable)
-    return(empty)
-  }
-
-  df <- bind_rows(input %>% mutate(class = "train"),
-                  tests %>% mutate(class = "test"))
-
-  flat <- function(x) {
-    mod <- lm(data = x %>% filter(class == "train") %>% mutate(value = qnorm(value)), value ~ 1)
-    x %>%
-      filter(class == "test") %>%
-      mutate(value = qnorm(value)) %>%
-      {mutate(., pred = predict(mod, type = 'response', newdata = .))} %>%
-      mutate(value = pnorm(value), pred = pnorm(pred)) %>%
-      select(-class)
-  }
-
-  df %>%
-    group_by(country, variable, sex) %>%
-    nest() %>%
-    mutate(data = purrr::map(data, flat)) %>%
-    unnest(data) %>%
-    ungroup() %>%
-    group_by(country, variable, sex) %>%
-    filter(recondist == min(recondist)) %>%
-    summarise(pred = mean(pred), value = mean(value)) %>%
-    mutate(diff = pred - value, diff_sq = diff^2) %>%
-    group_by(variable, sex) %>%
-    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
-              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
-              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
-    mutate(model = "flat", variable = variable, sex = sex) %>%
-    select(model, level = variable, sex, everything())
-}
-
-#' Survey level latest model test.
-#'
-#' \code{alt3_ltst3} uses the results of a "latest available value" model
-#' estimated using the input set to estimate the completion rate indicator
-#' of the observation year of each survey in the test set. The differences
-#' are summarised by the mean squared error,mean absolute deviation, and
-#' median absolute deviation.
-#'
-#' @param input Input set data frame.
-#' @param tests Test set data frame.
-#'
-#' @family testing functions
-#'
-#' @return Returns a summary table with the model performance.
-#'
-#' @export
-alt3_ltst3 <- function(input, tests) {
-  preds <- input %>%
-    group_by(country, variable, sex) %>%
-    filter(!is.na(value)) %>%
-    filter(obsyear == max(obsyear) & recondist == min(recondist)) %>%
-    summarise(pred = mean(value, na.rm = TRUE)) %>%
-    ungroup
-
-  tests %>%
-    group_by(country, variable, sex) %>%
-    filter(!is.na(value)) %>%
-    filter(recondist == min(recondist)) %>%
-    summarise(value = mean(value)) %>%
-    left_join(preds, by = c("country", "variable", "sex")) %>%
-    mutate(diff = pred - value, diff_sq = diff^2) %>%
-    group_by(variable, sex) %>%
-    summarise(mse.100 = round(100 * mean(diff_sq, na.rm = TRUE), 3),
-              mae.100 = round(100 * mean(abs(diff), na.rm = TRUE), 3),
-              mbe.100 = round(100 * mean(diff, na.rm = TRUE), 3),
-              mmad.100 = round(100 * median(abs(diff), na.rm = TRUE), 3)) %>%
-    mutate(model = "latest", variable = variable, sex = sex) %>%
-    select(model, level = variable, sex, everything())
-}
-
 #' Test model on new data
 #'
 #' \code{mdl_test} uses the results of a model run to test construct the posterior
@@ -539,7 +255,7 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     if (is.null(data[["mult5err"]])) {
       data[["mult5err"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_country"]])
     }
-    
+
     if (type == "lso") {
       if (is.null(get_parsamps(raw_mcmc, "sigma_s"))) {
         data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_c")
@@ -547,7 +263,8 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
         data[["sigma_s"]] <- get_nsvar(input, raw_mcmc)
       }
     } else {
-      if (is.null(get_parsamps(raw_mcmc, "sigma_s"))) {
+      data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
+      if (is.null(data[["sigma_s"]])) {
         temp1 <- get_parsamps(raw_mcmc, "sigma_c")
         temp2 <- bind_rows(input %>% mutate(test = 0),
                            testset %>% mutate(test = 1)) %>%
@@ -556,23 +273,22 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
           distinct %>%
           arrange(survey) %>%
           mutate(country = as.numeric(as.factor(country))) %>%
-          select(country) %>% 
+          select(country) %>%
           pull
-      
+
         temp3 <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
         for (i in 1:data[["n_survey"]]) {
           temp3[, i] <- temp1[, temp2[i]]
         }
         data[["sigma_s"]] <- temp3
-        data[["beta_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
-      } else {
-        data[["sigma_s"]] <- get_parsamps(raw_mcmc, "sigma_s")
-        data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
       }
-      
+
+      data[["beta_s"]] <- get_parsamps(raw_mcmc, "beta_s")
+      if (is.null(data[["beta_s"]])) {
+        data[["beta_s"]] <- matrix(data=0, nrow=data[["iters"]], ncol=data[["n_survey"]])
+      }
+
     }
-
-
 
     mod <- stan(model, seed = 2020, chains = 1, data = data,
                 warmup = 0, iter = 10, algorithm = "Fixed_param")
