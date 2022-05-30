@@ -119,9 +119,8 @@ get_bias <- function(df, raw_mcmc, rounds) {
     mutate(level = (df %>% ungroup %>% select(variable) %>% distinct %>% pull),
            sex = (df %>% ungroup %>% select(sex) %>% distinct %>% pull)) %>%
     left_join(rounds %>%
-                mutate(survey = paste0(country, survey, year)) %>%
-                rename(level = variable),
-              by=c("survey", "level"))
+                mutate(survey = paste0(country, survey, year)),
+              by=c("survey"))
 }
 
 #' Extract Model Parameters
