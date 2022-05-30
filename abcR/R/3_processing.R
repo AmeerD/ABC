@@ -69,6 +69,73 @@ mdl_process <- function(df, raw_mcmc) {
   projected %>% mutate(variable = variable, sex = sex)
 }
 
+#' Process ABC model output for dropout model.
+#'
+#' \code{mdl_process_dropout} operates on the raw stanfit object outputted by the ABC
+#' model and summarises the findings in a digestible format. Specifically,
+#' variants of the latent true completion rate are computed and presented in
+#' 90\% intervals.
+#'
+#' @param df Input data frame.
+#' @param raw_mcmc Raw ABC model MCMC output.
+#'
+#' @return Data frame with columns for country, year, series, value, lower,
+#' upper, variable, and sex. Note that series corresponds to one of:
+#'
+#' @export
+mdl_process_dropout <- function(df, raw_mcmc) {
+  startyear <- min(df$year)
+  baseyear <- startyear - 1
+  variable <- df %>% ungroup %>% select(variable) %>% distinct() %>% pull
+  sex <- df %>% ungroup %>% select(sex) %>% distinct() %>% pull
+
+  lookup <- df %>%
+    select(country, cap_adj) %>%
+    distinct
+
+  projected <- raw_mcmc %>%
+    tidybayes::recover_types(df) %>%
+    tidybayes::spread_draws(
+      mu_ct[country, year],
+      late[country],
+      vlate[country]
+    ) %>%
+    ungroup %>%
+    mutate(year = year + baseyear) %>%
+    select(-.iteration, -.chain) %>%
+    rename(iteration = .draw) %>%
+    group_by(country, iteration) %>%
+    arrange(year) %>%
+    mutate(
+      mu3.ct = mu_ct - 2*late,
+      mu4.ct = mu_ct - late,
+      mu5.ct = mu_ct,
+      mu6.ct = mu_ct + vlate,
+      mu7.ct = mu_ct + vlate*2,
+      mu8.ct = mu_ct + vlate*3
+    ) %>%
+    select(-mu_ct, -late, -vlate) %>%
+    mutate_at(.vars = vars(mu3.ct, mu4.ct, mu5.ct, mu6.ct, mu7.ct, mu8.ct), pnorm) %>%
+    left_join(lookup, by="country") %>%
+    mutate(mu3.ct = pmax(pmin(mu3.ct + cap_adj, 1), 0),
+           mu4.ct = pmax(pmin(mu4.ct + cap_adj, 1), 0),
+           mu5.ct = pmax(pmin(mu5.ct + cap_adj, 1), 0),
+           mu6.ct = pmax(pmin(mu6.ct + cap_adj, 1), 0),
+           mu7.ct = pmax(pmin(mu7.ct + cap_adj, 1), 0),
+           mu8.ct = pmax(pmin(mu8.ct + cap_adj, 1), 0)) %>%
+    select(country, year, iteration, a3=mu3.ct, a4=mu4.ct, a5=mu5.ct, a6=mu6.ct, a7=mu7.ct, a8=mu8.ct) %>%
+    tidyr::gather(series, value, a3, a4, a5, a6, a7, a8) %>%
+    group_by(country, year, series) %>%
+    tidybayes::point_interval(value, .width = 0.9) %>%
+    select(-.width, -.point, -.interval) %>%
+    rename(lower = .lower, upper = .upper) %>%
+    ungroup %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    filter(year >= startyear)
+
+  projected %>% mutate(variable = variable, sex = sex)
+}
+
 #' Process ABC joint model output.
 #'
 #' \code{mdl_jt_process} operates on the raw stanfit object outputted by the ABC
