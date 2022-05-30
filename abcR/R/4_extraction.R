@@ -14,6 +14,7 @@ get_yrepl <- function(input, mcmc) {
     mutate(index = row_number()) %>%
     select(index, country, year, survey) %>%
     inner_join(mcmc %>%
+                 posterior::as_draws_df() %>%
                  tidybayes::gather_draws(yrepl[n]) %>%
                  ungroup %>%
                  select(index=n, iteration=.draw, value=.value),
