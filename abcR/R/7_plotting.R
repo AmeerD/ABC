@@ -425,6 +425,5 @@ mk_trace_plot <- function(mcmc, rhats_all, lvl = "prim", sx = "total") {
     filter(level == lvl, sex == sx) %>%
     pull(parameter)
 
-  bayesplot::mcmc_trace(mcmc, pars = pars4trace, facet_args = list(ncol = 3, nrow = 3),
-                        np = bayesplot::nuts_params(mcmc))+theme_minimal()
+  rstan::traceplot(mcmc, pars = pars4trace)
 }
