@@ -52,7 +52,7 @@ combine_regs <- function(df, regions, pops) {
     mutate_at(vars(-country, -year, -series, -value, -sex, -level),
               function(x) ifelse(is.na(x), "World", x)) %>%
     {bind_rows(
-      select(., -SDG.region, -LDC, -LLDC, -SIDS, -continent) %>%
+      select(., -SDG.region, -LDC, -LLDC, -SIDS, -continent, -AU) %>%
         {bind_rows(
           .,
           filter(., income_group %in% c("Low", "Lower middle")) %>% mutate(income_group = "Low and lower middle"),
@@ -60,24 +60,27 @@ combine_regs <- function(df, regions, pops) {
         )} %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'income'),
-      select(., -income_group, -LDC, -LLDC, -SIDS, -continent) %>%
+      select(., -income_group, -LDC, -LLDC, -SIDS, -continent, -AU) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'regions'),
-      select(., -LDC, -LLDC, -SIDS, -continent) %>%
+      select(., -LDC, -LLDC, -SIDS, -continent, -AU) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'regionsXincome'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS) %>%
+      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -AU) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'continent'),
-      select(., -SDG.region, -income_group, -LLDC, -SIDS, -continent) %>%
+      select(., -SDG.region, -income_group, -LLDC, -SIDS, -continent, -AU) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'LDC'),
-      select(., -SDG.region, -income_group, -LDC, -SIDS, -continent) %>%
+      select(., -SDG.region, -income_group, -LDC, -SIDS, -continent, -AU) %>%
         reg_aggs(poptemp) %>%
         mutate(aggregates = 'LLDC'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -continent) %>%
+      select(., -SDG.region, -income_group, -LDC, -LLDC, -continent, -AU) %>%
         reg_aggs(poptemp) %>%
-        mutate(aggregates = 'SIDS')
+        mutate(aggregates = 'SIDS'),
+      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -continent) %>%
+        reg_aggs(poptemp) %>%
+        mutate(aggregates = 'AU')
     )} %>%
     order_levels
 }
