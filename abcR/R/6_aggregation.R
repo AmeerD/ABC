@@ -58,34 +58,34 @@ combine_regs <- function(df, regions, pops) {
           filter(., Income %in% c("Low income", "Lower middle income")) %>% mutate(Income = "Low and lower middle"),
           filter(., Income %in% c("Upper middle income", "Lower middle income")) %>% mutate(Income = "Lower and upper middle")
         )} %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'income'),
       select(., -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'regions'),
       select(., -Region, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'subregions'),
       select(., -SubRegion, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'regionsXincome'),
       select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'Continent'),
       select(., -Region, -SubRegion, -Income, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'LDC'),
       select(., -Region, -SubRegion, -Income, -LDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'LLDC'),
       select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'SIDS'),
       select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -GPE, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'AU'),
       select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -CAC, -PCFC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'GPE'),
       select(., -Region, -SubRegion, -LDC, -LLDC, -SIDS, -Continent, -GPE, -AU, -PCFC) %>%
         {bind_rows(
@@ -93,10 +93,10 @@ combine_regs <- function(df, regions, pops) {
           filter(., Income %in% c("Low income", "Lower middle income"), CAC == "CAC") %>% mutate(CAC = "L/LMIC CAC")
         )} %>%
         select(-Income) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'CAC'),
       select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -GPE, -AU, -CAC) %>%
-        aggcr(poptemp) %>%
+        reg_aggs(poptemp) %>%
         mutate(aggregates = 'PCFC')
     )} %>%
     abcR::order_levels()
