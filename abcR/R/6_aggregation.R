@@ -52,43 +52,54 @@ combine_regs <- function(df, regions, pops) {
     mutate_at(vars(-country, -year, -series, -value, -sex, -level),
               function(x) ifelse(is.na(x), "World", x)) %>%
     {bind_rows(
-      select(., -SDG.region, -LDC, -LLDC, -SIDS, -continent, -AU, -GPE, -CAC) %>%
+      select(., -Region, -SubRegion, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
         {bind_rows(
           .,
-          filter(., income_group %in% c("Low", "Lower middle")) %>% mutate(income_group = "Low and lower middle"),
-          filter(., income_group %in% c("Lower middle", "Upper middle")) %>% mutate(income_group = "Lower and upper middle")
+          filter(., Income %in% c("Low income", "Lower middle income")) %>% mutate(Income = "Low and lower middle"),
+          filter(., Income %in% c("Upper middle income", "Lower middle income")) %>% mutate(Income = "Lower and upper middle")
         )} %>%
-        reg_aggs(poptemp) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'income'),
-      select(., -income_group, -LDC, -LLDC, -SIDS, -continent, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'regions'),
-      select(., -LDC, -LLDC, -SIDS, -continent, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
+        mutate(aggregates = 'subregions'),
+      select(., -SubRegion, -LDC, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'regionsXincome'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
-        mutate(aggregates = 'continent'),
-      select(., -SDG.region, -income_group, -LLDC, -SIDS, -continent, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
+        mutate(aggregates = 'Continent'),
+      select(., -Region, -SubRegion, -Income, -LLDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'LDC'),
-      select(., -SDG.region, -income_group, -LDC, -SIDS, -continent, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -SubRegion, -Income, -LDC, -SIDS, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'LLDC'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -continent, -AU, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -Continent, -AU, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'SIDS'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -continent, -GPE, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -GPE, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'AU'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -continent, -AU, -CAC) %>%
-        reg_aggs(poptemp) %>%
+      select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -AU, -CAC, -PCFC) %>%
+        aggcr(poptemp) %>%
         mutate(aggregates = 'GPE'),
-      select(., -SDG.region, -income_group, -LDC, -LLDC, -SIDS, -continent, -GPE, -AU) %>%
-        reg_aggs(poptemp) %>%
-        mutate(aggregates = 'CAC')
+      select(., -Region, -SubRegion, -LDC, -LLDC, -SIDS, -Continent, -GPE, -AU, -PCFC) %>%
+        {bind_rows(
+          .,
+          filter(., Income %in% c("Low income", "Lower middle income"), CAC == "CAC") %>% mutate(CAC = "L/LMIC CAC")
+        )} %>%
+        select(-Income) %>%
+        aggcr(poptemp) %>%
+        mutate(aggregates = 'CAC'),
+      select(., -Region, -SubRegion, -Income, -LDC, -LLDC, -SIDS, -Continent, -GPE, -AU, -CAC) %>%
+        aggcr(poptemp) %>%
+        mutate(aggregates = 'PCFC')
     )} %>%
-    order_levels
+    abcR::order_levels()
 }
 
 #' Projections to 2030
