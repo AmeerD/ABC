@@ -170,6 +170,7 @@ whitelist <- function(df) {
                           'HUNCensus2001',
                           'ROUCensus2011',
                           'BLRCensus2009') & recondist <= 0),
+         !(survey == 'GABEGEP2017' & variable == 'four'), ##Dec 2022 eduyears missing
          !(survey == 'CHNCFPS2018' & sex != "total"), ## Missing sex values inducing bias in male/female observations
           !((variable %in% c('prim', 'four')) & (
             (survey %in% c('CANCensus2011', 'SDNCensus2008', 'SSDMICS2000', 'URYCensus2006',
