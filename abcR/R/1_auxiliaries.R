@@ -182,7 +182,9 @@ whitelist <- function(df) {
                            #Feb 22, 2021 additions
                            'ARGMICS2020', 'TCAMICS2019',
                            #Dec 2022 additions
-                           'ARMILCS2018',  'KORLIS2006', 'KORLIS2008'
+                           'ARMILCS2018',  'KORLIS2006', 'KORLIS2008',
+                           #July 2023 additions
+                           'NGAMICS2021', 'AFGMICS2022'
             )) |
               (survey %in% c('LVASILC2005', 'MNGMICS2000', 'POLCensus2002', 'CHNCensus2000',
                              'FRASILC2017', 'TURCensus2000') & obsage > 0) |
@@ -197,7 +199,9 @@ whitelist <- function(df) {
                                                  #Feb 22, 2021 additions
                                                  'ARGMICS2020', 'TCAMICS2019',
                                                  #Dec 2022 additions
-                                                 'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008')) |
+                                                 'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
+                                                 #July 2023 additions
+                                                 'NGAMICS2021', 'AFGMICS2022')) |
                                     (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012', 'TURCensus2000') & obsage > 0) |
                                     (survey %in% c('BIHMICS2011') & recondist > 7)
           )),
@@ -212,7 +216,9 @@ whitelist <- function(df) {
                                                  #Feb 22, 2021 additions
                                                  'ARGMICS2020', 'TCAMICS2019',
                                                  #Dec 2022 additions
-                                                 'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008')) |
+                                                 'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
+                                                 #July 2023 additions
+                                                 'NGAMICS2021', 'AFGMICS2022')) |
                                     (survey %in% c('BELSILC2017') & obsage > 0) |
                                     (survey %in% c('KENDHS2003', 'TJKMICS2005') & recondist > 7) |
                                     (survey %in% c('TKMMICS2006', 'TKMMICS2015') & year >= 2002 & year <= 2014)
