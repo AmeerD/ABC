@@ -63,7 +63,7 @@ mdl_process <- function(df, raw_mcmc) {
     select(-.width, -.point, -.interval) %>%
     rename(lower = .lower, upper = .upper) %>%
     ungroup %>%
-    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 4)) %>%
     filter(year >= startyear)
 
   projected %>% mutate(variable = variable, sex = sex)
@@ -130,7 +130,7 @@ mdl_process_dropout <- function(df, raw_mcmc) {
     select(-.width, -.point, -.interval) %>%
     rename(lower = .lower, upper = .upper) %>%
     ungroup %>%
-    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 4)) %>%
     filter(year >= startyear)
 
   projected %>% mutate(variable = variable, sex = sex)
@@ -208,7 +208,7 @@ mdl_jt_process <- function(df, raw_mcmc, props) {
     select(-.width, -.point, -.interval) %>%
     rename(lower = .lower, upper = .upper) %>%
     ungroup %>%
-    mutate_at(vars(value, lower, upper), ~ round(., 3)) %>%
+    mutate_at(vars(value, lower, upper), ~ round(., 4)) %>%
     filter(year >= startyear)
 
   projected %>% mutate(variable = variable)
