@@ -184,7 +184,7 @@ whitelist <- function(df) {
                            #Dec 2022 additions
                            'ARMILCS2018',  'KORLIS2006', 'KORLIS2008',
                            #July 2023 additions
-                           'NGAMICS2021', #'AFGMICS2022'
+                           'NGAMICS2021'#, 'AFGMICS2022'
             )) |
               (survey %in% c('LVASILC2005', 'MNGMICS2000', 'POLCensus2002', 'CHNCensus2000',
                              'FRASILC2017', 'TURCensus2000') & obsage > 0) |
