@@ -184,7 +184,7 @@ whitelist <- function(df) {
                            #Dec 2022 additions
                            'ARMILCS2018',  'KORLIS2006', 'KORLIS2008',
                            #July 2023 additions
-                           'NGAMICS2021', 'AFGMICS2022'
+                           'NGAMICS2021', #'AFGMICS2022'
             )) |
               (survey %in% c('LVASILC2005', 'MNGMICS2000', 'POLCensus2002', 'CHNCensus2000',
                              'FRASILC2017', 'TURCensus2000') & obsage > 0) |
@@ -201,7 +201,7 @@ whitelist <- function(df) {
                                                  #Dec 2022 additions
                                                  'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
                                                  #July 2023 additions
-                                                 'NGAMICS2021', 'AFGMICS2022',
+                                                 'NGAMICS2021', #'AFGMICS2022',
                                                  #January 2024 additions
                                                  'ISLLFS2011', 'ISLLFS2012')) |
                                     (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012', 'TURCensus2000') & obsage > 0) |
@@ -220,7 +220,7 @@ whitelist <- function(df) {
                                                  #Dec 2022 additions
                                                  'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
                                                  #July 2023 additions
-                                                 'NGAMICS2021', 'AFGMICS2022', 
+                                                 'NGAMICS2021', #'AFGMICS2022', 
                                                  #Dec 2023 additions
                                                  'PHLDHS2022')) |
                                     (survey %in% c('BELSILC2017') & obsage > 0) |
