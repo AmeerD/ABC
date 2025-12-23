@@ -173,7 +173,7 @@ whitelist <- function(df) {
          !(survey == 'GABEGEP2017' & variable == 'four'), ##Dec 2022 eduyears missing
          !(survey == 'CHNCFPS2018' & sex != "total"), ## Missing sex values inducing bias in male/female observations
           !((variable %in% c('prim', 'four')) & (
-            (survey %in% c('CANCensus2011', 'SDNCensus2008', 'SSDMICS2000', 'URYCensus2006',
+            (survey %in% c('CANCensus2011', 'SDNCensus2008', 'SSDMICS2000', #'URYCensus2006', ##Fixed Dec 23, 2025 by recoding
                            'FRACensus2006', 'FRACensus2011', 'LTUSILC2013', 'BGRSILC2013',
                            'BELSILC2013', 'LVASILC2005',
                            #Sept 9, 2021 additions
@@ -191,7 +191,8 @@ whitelist <- function(df) {
               (survey %in% c('TTOMICS2011') & recondist > 10)
           )),
           !(variable == 'lsec' & ((survey %in% c('ALBDHS2009', 'ARMDHS2000', 'CANCensus2011', 'CHESILC2009',
-                                                 'KENCensus2009', 'LVASILC2005', 'SDNCensus2008', 'SSDMICS2000', 'SVNSILC2005',
+                                                 #'KENCensus2009', ##Fixed Dec 23, 2025 by recoding
+                                                 'LVASILC2005', 'SDNCensus2008', 'SSDMICS2000', 'SVNSILC2005',
                                                  'VENMICS2000',
                                                  #Sept 9, 2021 additions
                                                  'NPLMICS2010', 'NPLMICS2019', 'TKMMICS2019', 'ALBDHS2017', 'CMRMICS2014',
@@ -204,7 +205,8 @@ whitelist <- function(df) {
                                                  'NGAMICS2021', #'AFGMICS2022',
                                                  #January 2024 additions
                                                  'ISLLFS2011', 'ISLLFS2012')) |
-                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', 'ZWECensus2012', 'TURCensus2000') & obsage > 0) |
+                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', #'ZWECensus2012', ##Fixed Dec 23, 2025 by recoding
+                                                   'TURCensus2000') & obsage > 0) |
                                     (survey %in% c('BIHMICS2011') & recondist > 7)
           )),
           !(variable == 'usec' & ((survey %in% c('ARMDHS2016', 'ARMDHS2000', 'BIHMICS2011', 'EGYDHS2005', 'EGYDHS2014',
