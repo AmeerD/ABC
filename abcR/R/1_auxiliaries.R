@@ -191,7 +191,7 @@ whitelist <- function(df) {
               (survey %in% c('TTOMICS2011') & recondist > 10)
           )),
           !(variable == 'lsec' & ((survey %in% c('ALBDHS2009', 'ARMDHS2000', 'CANCensus2011', 'CHESILC2009',
-                                                 #'KENCensus2009', ##Fixed Dec 23, 2025 by recoding
+                                                 # 'KENCensus2009', ##Fixed Dec 23, 2025 by recoding
                                                  'LVASILC2005', 'SDNCensus2008', 'SSDMICS2000', 'SVNSILC2005',
                                                  'VENMICS2000',
                                                  #Sept 9, 2021 additions
@@ -202,10 +202,10 @@ whitelist <- function(df) {
                                                  #Dec 2022 additions
                                                  'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
                                                  #July 2023 additions
-                                                 'NGAMICS2021', #'AFGMICS2022',
+                                                 'NGAMICS2021', # 'AFGMICS2022',
                                                  #January 2024 additions
                                                  'ISLLFS2011', 'ISLLFS2012')) |
-                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', #'ZWECensus2012', ##Fixed Dec 23, 2025 by recoding
+                                    (survey %in% c('HUNCensus2011', 'MNGMICS2000', 'POLCensus2002', # 'ZWECensus2012', ##Fixed Dec 23, 2025 by recoding
                                                    'TURCensus2000') & obsage > 0) |
                                     (survey %in% c('BIHMICS2011') & recondist > 7)
           )),
@@ -222,7 +222,7 @@ whitelist <- function(df) {
                                                  #Dec 2022 additions
                                                  'ARMILCS2018', 'JPNLIS2008', 'JPNLIS2010', 'JPNLIS2013', 'KORLIS2006', 'KORLIS2008',
                                                  #July 2023 additions
-                                                 'NGAMICS2021', #'AFGMICS2022', 
+                                                 'NGAMICS2021', # 'AFGMICS2022', 
                                                  #Dec 2023 additions
                                                  'PHLDHS2022')) |
                                     (survey %in% c('BELSILC2017') & obsage > 0) |
