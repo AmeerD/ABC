@@ -201,8 +201,8 @@ test_abc2 <- function(input, tests, raw_mcmc, model, type) {
   #Append parameter samples
   data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
   data[["iters"]] <- dim(data[["mu_ct"]])[1]
-  data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% replace_na(0)
-  data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% replace_na(0)
+  data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% tidyr::replace_na(0)
+  data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% tidyr::replace_na(0)
   data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
   data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
   if (is.null(data[["mult5err"]])) {
@@ -333,8 +333,8 @@ mdl_test <- function(input, testset, raw_mcmc, model, type) {
     #Append parameter samples
     data[["mu_ct"]] <- get_parsamps(raw_mcmc, "mu_ct")
     data[["iters"]] <- dim(data[["mu_ct"]])[1]
-    data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% replace_na(0)
-    data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% replace_na(0)
+    data[["late"]] <- get_parsamps(raw_mcmc, "late") %>% tidyr::replace_na(0)
+    data[["vlate"]] <- get_parsamps(raw_mcmc, "vlate") %>% tidyr::replace_na(0)
     data[["cibounds"]] <- floor(data[["iters"]]*c(0.025,0.05,0.1,0.9,0.95,0.975))
     data[["mult5err"]] <- get_parsamps(raw_mcmc, "mult5err")
     if (is.null(data[["mult5err"]])) {
@@ -398,7 +398,7 @@ test_cov <- function(input, raw_mcmc, type) {
       tidybayes::point_interval(.value, .width = c(0.8, 0.9, 0.95)) %>%
       select(-.value, -.point, -.interval) %>%
       rename(lower = .lower, upper = .upper) %>%
-      pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
+      tidyr::pivot_wider(names_from = .width, values_from = c(lower, upper)) %>%
       ungroup
     input %>%
       bind_cols(reps) %>%
@@ -415,6 +415,6 @@ test_cov <- function(input, raw_mcmc, type) {
     data.frame(coverage = row.names(covs), covs, row.names=NULL) %>%
       filter(coverage != "lp__") %>%
       select(coverage, mean = mean.chain.1) %>%
-      pivot_wider(names_from = "coverage", values_from = "mean")
+      tidyr::pivot_wider(names_from = "coverage", values_from = "mean")
   }
 }

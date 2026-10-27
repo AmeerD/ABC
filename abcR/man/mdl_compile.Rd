@@ -4,10 +4,14 @@
 \alias{mdl_compile}
 \title{Compile ABC model}
 \usage{
-mdl_compile(model = modelfile)
+mdl_compile(model = NULL, ...)
 }
 \arguments{
-\item{model}{Stan model file.}
+\item{model}{\code{NULL} (default) to compile the ABC independent model shipped
+with the package (\code{\link{abc_model_file}}), a path to a \code{.stan}
+file, or Stan code as a character vector (e.g. from \code{readLines()}).}
+
+\item{...}{Passed to \code{\link[rstan]{stan_model}} (e.g. \code{auto_write}).}
 }
 \value{
 Compiled stan model.

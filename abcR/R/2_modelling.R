@@ -54,16 +54,32 @@ wide_bkprj_4mdl <- function(df) {
 #' modeling using the \code{\link[tidybayes]{compose_data}} function.
 #'
 #' @param df Raw input data frame produced by \code{\link{mk_dataset_4modeling}}.
-#' @param cutoff Extreme value cap (DEPRECATED).
+#'   Must contain a \code{cap_adj} column; see \code{\link{add_cap_adj}}.
+#' @param cutoff Extreme value cap (DEPRECATED, unused; use \code{\link{add_cap_adj}}).
+#' @param end_year Last calendar year of the latent series. The model horizon
+#'   (\code{nyears}) is \code{end_year - (min(df$year) - 1)}. If \code{NULL}
+#'   (the historical behaviour) it is \code{current year + 5}, which makes the
+#'   model dimensions depend on the date the code is run; pass it explicitly for
+#'   reproducible runs. Note that the \code{projected3t5} series produced by
+#'   \code{\link{mdl_process}} ends at \code{end_year - 2}.
 #' @param ... Pass through parameters.
 #'
 #' @return Outputs a list formatted as input into the ABC Stan model.
 #'
 #' @export
-mdl_prep <- function(df, cutoff = 0.98, ...) {
+mdl_prep <- function(df, cutoff = 0.98, end_year = NULL, ...) {
+  if (!"cap_adj" %in% names(df)) {
+    stop("`df` has no `cap_adj` column. Add it with add_cap_adj() ",
+         "(or split_abc_groups()) before calling mdl_prep().", call. = FALSE)
+  }
   baseyear    <- min(df$year) - 1
+  if (is.null(end_year)) {
+    end_year <- lubridate::year(Sys.Date()) + 5
+    message("mdl_prep(): `end_year` not supplied; using current year + 5 = ",
+            end_year, ". Pass `end_year` explicitly for reproducible runs.")
+  }
 
-  df %>%
+  out <- df %>%
     #
     group_by(country) %>%
     mutate(haslate = ifelse(median(value) >= 0.95, 0, 1)) %>%
@@ -91,7 +107,6 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     tidybayes::compose_data() %>%
     within(., {
       year = year - baseyear
-      nyears = lubridate::year(Sys.Date()) + 5 - baseyear #2025 - baseyear
       survey_count = data.frame(country, survey) %>%
         distinct() %>%
         count(country) %>%
@@ -141,6 +156,12 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
         select(vc) %>%
         pull()
     })
+  out$nyears <- as.integer(end_year - baseyear)
+  if (out$nyears < max(out$year)) {
+    stop("`end_year` (", end_year, ") is earlier than the last observed ",
+         "reconstructed year (", max(out$year) + baseyear, ").", call. = FALSE)
+  }
+  out
 }
 
 #' Additional ABC model inputs for joint modelling.
@@ -167,14 +188,22 @@ mdl_joint_prep <- function(inputs, jpars = NULL, ...) {
 #'
 #' \code{mdl_compile} compiles the given stan model.
 #'
-#' @param model Stan model file.
+#' @param model \code{NULL} (default) to compile the ABC independent model shipped
+#'   with the package (\code{\link{abc_model_file}}), a path to a \code{.stan}
+#'   file, or Stan code as a character vector (e.g. from \code{readLines()}).
+#' @param ... Passed to \code{\link[rstan]{stan_model}} (e.g. \code{auto_write}).
 #'
 #' @return Compiled stan model.
 #' @export
-mdl_compile <- function(model = modelfile) {
-  smod <- stan_model(model_code = model)
-  print("Model Compiled!")
-  return(smod)
+mdl_compile <- function(model = NULL, ...) {
+  if (is.null(model)) model <- abc_model_file()
+  smod <- if (length(model) == 1L && !grepl("\n", model) && file.exists(model)) {
+    stan_model(file = model, ...)
+  } else {
+    stan_model(model_code = paste(model, collapse = "\n"), ...)
+  }
+  message("Model compiled.")
+  smod
 }
 
 #' Initialize the drift parameter.
@@ -200,39 +229,82 @@ init_drift <- function(ncountry, nyears, joint = FALSE) {
 #' Execute ABC model.
 #'
 #' \code{mdl_core} calls the Stan sampler to sample from the ABC model.
-#' It should not be called directly, and instead should only be called
-#' through the \code{\link{mdl_run}} function.
+#' It is normally called through \code{\link{mdl_run}}.
 #'
-#' @param data Input data frame.
-#' @param chain_nr NUTS chain number.
-#' @param init Initialization method.
-#' @param model ABC Stan model.
+#' Initial values: unless \code{init} is supplied, one list per chain is drawn
+#' with \code{init_drift}, using the seed \code{init_seed + chain_nr - 1}, so a
+#' run is determined by \code{seed}, \code{init_seed}, \code{chain_nr} and the
+#' data. Runs that fit one chain per call with different \code{chain_nr} (as in
+#' \code{scripts/sample_plans.R}) therefore still start from different values.
+#' The global random number generator state is left unchanged. (Before 0.2.0 the
+#' inits came from the unseeded global RNG, and a single init list was passed
+#' to the sampler, so \code{nchains > 1} in one call failed.)
+#'
+#' @param data Stan data list from \code{\link{mdl_prep}}.
+#' @param chain_nr First chain id.
+#' @param init \code{"random"} (draw drift inits, see Details), or a list of
+#'   per-chain init lists, or anything accepted by \code{\link[rstan]{sampling}}.
+#' @param model Compiled ABC Stan model (\code{\link{mdl_compile}}).
 #' @param nchains Number of chains.
-#' @param nburn Number of burn-in iterations
-#' @param niter Number of sampling iterations.
-#' @param nthin Thining parameter.
-#' @param ... Pass through parameters.
+#' @param nburn Number of warm-up iterations.
+#' @param niter Number of post-warm-up iterations.
+#' @param nthin Thinning interval.
+#' @param seed Sampler seed (historically fixed at 2019).
+#' @param init_seed Seed for drawing initial values (defaults to \code{seed});
+#'   \code{NULL} draws them from the current RNG state.
+#' @param cores Number of chains to run in parallel.
+#' @param adapt_delta,max_treedepth NUTS control settings.
+#' @param refresh Progress printing interval passed to the sampler.
+#' @param ... Ignored (pass-through from \code{\link{mdl_run}}).
 #'
-#' @return Returns a stanfit object.
-mdl_core <- function(data, chain_nr, init = 'random', model, nchains, nburn, niter, nthin, ...) {
-  init2 <- list(init_drift(data$n_country, data$nyears, !is.null(data$mprop)))
-  #smod <- stan_model(model_code = model)
-  #print("Model Compiled!")
-  mod <- sampling(
+#' @return Returns a stanfit object. The initial values used are stored in
+#'   \code{attr(fit, "abc_init")}.
+mdl_core <- function(data, chain_nr = 1, init = 'random', model, nchains = 1,
+                     nburn, niter, nthin = 1, seed = 2019, init_seed = seed,
+                     cores = 1, adapt_delta = 0.9, max_treedepth = 12,
+                     refresh = max(floor((nburn + niter) / 10), 1), ...) {
+  if (missing(model)) stop("Supply a compiled model: model = mdl_compile().", call. = FALSE)
+  if (identical(init, 'random')) {
+    init <- mdl_draw_inits(data, nchains = nchains,
+                           seed = if (is.null(init_seed)) NULL else init_seed + chain_nr - 1)
+  }
+  fit <- sampling(
     model,
-    seed = 2019,
-    chain_id = chain_nr,
-    chains = nchains,
     data = data,
-    init = init2,
-    #pars = pars,
+    seed = seed,
+    chains = nchains,
+    chain_id = seq.int(chain_nr, length.out = nchains),
+    cores = cores,
+    init = init,
     warmup = nburn,
     iter   = nburn + niter,
     thin   = nthin,
-    control = list(adapt_delta = 0.9, max_treedepth = 12),
-    #model_code = model
+    refresh = refresh,
+    control = list(adapt_delta = adapt_delta, max_treedepth = max_treedepth)
   )
-  return(mod)
+  attr(fit, "abc_init") <- init
+  fit
+}
+
+#' Draw initial values for the ABC model.
+#'
+#' @param data Stan data list from \code{\link{mdl_prep}}.
+#' @param nchains Number of chains.
+#' @param seed Seed for the random draws, or \code{NULL} to use the current RNG
+#'   state. With a seed, the global RNG state is restored afterwards.
+#'
+#' @return A list of \code{nchains} init lists.
+#' @export
+mdl_draw_inits <- function(data, nchains = 1, seed = NULL) {
+  if (!is.null(seed)) {
+    had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+    if (had_seed) old_seed <- get(".Random.seed", envir = globalenv())
+    on.exit(if (had_seed) assign(".Random.seed", old_seed, envir = globalenv())
+            else rm(".Random.seed", envir = globalenv()))
+    set.seed(seed)
+  }
+  lapply(seq_len(nchains), function(i)
+    init_drift(data$n_country, data$nyears, !is.null(data$mprop)))
 }
 
 #' Run the ABC model.
@@ -240,8 +312,10 @@ mdl_core <- function(data, chain_nr, init = 'random', model, nchains, nburn, nit
 #' \code{mdl_run} pre-processes the input data using \code{\link{mdl_prep}}
 #' and subsequently samples from the ABC model using \code{\link{mdl_core}}.
 #'
-#' @param df Input data frame.
-#' @param ... Pass through parameters.
+#' @param df Input data frame (one level/sex group, with \code{cap_adj}).
+#' @param ... Passed to \code{\link{mdl_prep}} (e.g. \code{end_year}) and
+#'   \code{\link{mdl_core}} (e.g. \code{model}, \code{nchains}, \code{nburn},
+#'   \code{niter}, \code{nthin}, \code{seed}, \code{cores}).
 #'
 #' @return Returns a stanfit object.
 #'
