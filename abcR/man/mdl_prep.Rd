@@ -4,12 +4,20 @@
 \alias{mdl_prep}
 \title{Pre-process ABC model input.}
 \usage{
-mdl_prep(df, cutoff = 0.98, ...)
+mdl_prep(df, cutoff = 0.98, end_year = NULL, ...)
 }
 \arguments{
-\item{df}{Raw input data frame produced by \code{\link{mk_dataset_4modeling}}.}
+\item{df}{Raw input data frame produced by \code{\link{mk_dataset_4modeling}}.
+Must contain a \code{cap_adj} column; see \code{\link{add_cap_adj}}.}
 
-\item{cutoff}{Extreme value cap (DEPRECATED).}
+\item{cutoff}{Extreme value cap (DEPRECATED, unused; use \code{\link{add_cap_adj}}).}
+
+\item{end_year}{Last calendar year of the latent series. The model horizon
+(\code{nyears}) is \code{end_year - (min(df$year) - 1)}. If \code{NULL}
+(the historical behaviour) it is \code{current year + 5}, which makes the
+model dimensions depend on the date the code is run; pass it explicitly for
+reproducible runs. Note that the \code{projected3t5} series produced by
+\code{\link{mdl_process}} ends at \code{end_year - 2}.}
 
 \item{...}{Pass through parameters.}
 }

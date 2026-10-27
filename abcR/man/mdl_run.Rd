@@ -7,9 +7,11 @@
 mdl_run(df, ...)
 }
 \arguments{
-\item{df}{Input data frame.}
+\item{df}{Input data frame (one level/sex group, with \code{cap_adj}).}
 
-\item{...}{Pass through parameters.}
+\item{...}{Passed to \code{\link{mdl_prep}} (e.g. \code{end_year}) and
+\code{\link{mdl_core}} (e.g. \code{model}, \code{nchains}, \code{nburn},
+\code{niter}, \code{nthin}, \code{seed}, \code{cores}).}
 }
 \value{
 Returns a stanfit object.

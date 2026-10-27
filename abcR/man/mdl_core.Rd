@@ -6,40 +6,68 @@
 \usage{
 mdl_core(
   data,
-  chain_nr,
+  chain_nr = 1,
   init = "random",
   model,
-  nchains,
+  nchains = 1,
   nburn,
   niter,
-  nthin,
+  nthin = 1,
+  seed = 2019,
+  init_seed = seed,
+  cores = 1,
+  adapt_delta = 0.9,
+  max_treedepth = 12,
+  refresh = max(floor((nburn + niter)/10), 1),
   ...
 )
 }
 \arguments{
-\item{data}{Input data frame.}
+\item{data}{Stan data list from \code{\link{mdl_prep}}.}
 
-\item{chain_nr}{NUTS chain number.}
+\item{chain_nr}{First chain id.}
 
-\item{init}{Initialization method.}
+\item{init}{\code{"random"} (draw drift inits, see Details), or a list of
+per-chain init lists, or anything accepted by \code{\link[rstan]{sampling}}.}
 
-\item{model}{ABC Stan model.}
+\item{model}{Compiled ABC Stan model (\code{\link{mdl_compile}}).}
 
 \item{nchains}{Number of chains.}
 
-\item{nburn}{Number of burn-in iterations}
+\item{nburn}{Number of warm-up iterations.}
 
-\item{niter}{Number of sampling iterations.}
+\item{niter}{Number of post-warm-up iterations.}
 
-\item{nthin}{Thining parameter.}
+\item{nthin}{Thinning interval.}
 
-\item{...}{Pass through parameters.}
+\item{seed}{Sampler seed (historically fixed at 2019).}
+
+\item{init_seed}{Seed for drawing initial values (defaults to \code{seed});
+\code{NULL} draws them from the current RNG state.}
+
+\item{cores}{Number of chains to run in parallel.}
+
+\item{adapt_delta, max_treedepth}{NUTS control settings.}
+
+\item{refresh}{Progress printing interval passed to the sampler.}
+
+\item{...}{Ignored (pass-through from \code{\link{mdl_run}}).}
 }
 \value{
-Returns a stanfit object.
+Returns a stanfit object. The initial values used are stored in
+  \code{attr(fit, "abc_init")}.
 }
 \description{
 \code{mdl_core} calls the Stan sampler to sample from the ABC model.
-It should not be called directly, and instead should only be called
-through the \code{\link{mdl_run}} function.
+It is normally called through \code{\link{mdl_run}}.
+}
+\details{
+Initial values: unless \code{init} is supplied, one list per chain is drawn
+with \code{init_drift}, using the seed \code{init_seed + chain_nr - 1}, so a
+run is determined by \code{seed}, \code{init_seed}, \code{chain_nr} and the
+data. Runs that fit one chain per call with different \code{chain_nr} (as in
+\code{scripts/sample_plans.R}) therefore still start from different values.
+The global random number generator state is left unchanged. (Before 0.2.0 the
+inits came from the unseeded global RNG, and a single init list was passed
+to the sampler, so \code{nchains > 1} in one call failed.)
 }

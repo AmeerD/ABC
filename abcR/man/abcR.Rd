@@ -2,6 +2,7 @@
 % Please edit documentation in R/0_abcR.R
 \docType{package}
 \name{abcR}
+\alias{abcR-package}
 \alias{abcR}
 \title{abcR: A package for running the Adjusted Bayesian Completion Rates
 (ABC) model pipeline.}
@@ -35,3 +36,17 @@ The function for output extraction are:
 }
 }
 
+\author{
+\strong{Maintainer}: Bilal Barakat \email{bf.barakat@unesco.org}
+
+Authors:
+\itemize{
+  \item Ameer Dharamshi \email{ameerdharamshi@gmail.com}
+}
+
+Other contributors:
+\itemize{
+  \item Ellen Zhou (qs2 migration, Stan syntax update, workflow functions) [contributor]
+}
+
+}

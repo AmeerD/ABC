@@ -28,7 +28,7 @@ Other testing functions:
 \code{\link{alt3_ltst3}()},
 \code{\link{remove_latest}()},
 \code{\link{remove_recent}()},
-\code{\link{test_abc2}()},
-\code{\link{test_abc}()}
+\code{\link{test_abc}()},
+\code{\link{test_abc2}()}
 }
 \concept{testing functions}

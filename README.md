@@ -24,3 +24,22 @@ library(abcR)
 ## Sample Data
 
 We provide a sample dataset in the [data](https://github.com/AmeerD/ABC/tree/main/data) folder to illustrate the mechanisms of the model. Note that due to data sharing policies, the presented data contains ten anonymised countries and random noise has been added to all observed values. The magnitude of this error exceeds the sampling variation for a great majority of the data points. Readers may experiment with this data using the ABCtest.R script in the [scripts](https://github.com/AmeerD/ABC/tree/main/scripts) folder. 
+
+The same data ships with the package as `abc_example_data()`, so the example can also be run with the workflow helpers added in abcR 0.2.0:
+```r
+library(abcR)
+inputs <- split_abc_groups(abc_example_data())  # cap adjustment + nine level/sex groups
+res <- abc_run_groups(inputs, end_year = 2031, chains = 4, cores = 4,
+                      warmup = 5000, iter = 5000, thin = 5)
+res$diagnostics   # Rhat, bulk/tail ESS, divergences, tree-depth hits per group
+head(res$output)  # processed estimates, as from mdl_process()
+```
+`end_year` fixes the length of the latent series, so results do not depend on the date the code is run.
+
+## Prepped survey files
+
+`agg_survey()` reads pre-processed survey files saved with [qs2](https://cran.r-project.org/package=qs2) as `data/<survey>_prepped.qs2`. Files saved with the former `qs` package (now archived on CRAN) have a different format and must be converted once, in an environment where `qs` can still be installed:
+```r
+obj <- qs::qread("data/XXX_prepped.qs")
+qs2::qs_save(obj, "data/XXX_prepped.qs2")
+```

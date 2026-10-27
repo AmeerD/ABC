@@ -38,14 +38,16 @@ level_names <- function(...) {
 
 #' Aggregate surveys
 #'
-#' @param survey Survey data file.
+#' @param survey Survey identifier. Reads data/<survey>_prepped.qs2.
+#'   Files saved with the former \pkg{qs} package must be converted first
+#'   (see the README section "Prepped survey files").
 #' @param bycats Category for aggregation.
 #' @param estimate_se Boolean indicating whether to estimate standard errors.
 #'
 #' @export
 agg_survey <- function(survey, bycats, estimate_se = FALSE) {
-  path = paste0('data/', survey, '_prepped.qs');
-  qs::qread(path) %>%
+  path <- file.path('data', paste0(survey, '_prepped.qs2'))
+  read_prepped_survey(path) %>%
     filter(between(age, 10, 45)) %>%
     mutate(variable = level) %>%
     wide_aggregate(categories = bycats, depth = length(bycats), estimate_se = estimate_se) %>%
