@@ -55,13 +55,26 @@ wide_bkprj_4mdl <- function(df) {
 #'
 #' @param df Raw input data frame produced by \code{\link{mk_dataset_4modeling}}.
 #' @param cutoff Extreme value cap (DEPRECATED).
+#' @param end_year Last calendar year of the latent series, which fixes the
+#'   number of modelled years (\code{nyears}). The default, \code{NULL}, uses
+#'   the current year plus five, so the model dimensions depend on the date the
+#'   code is run; supply a year to make a run reproducible at a later date.
 #' @param ... Pass through parameters.
 #'
 #' @return Outputs a list formatted as input into the ABC Stan model.
 #'
 #' @export
-mdl_prep <- function(df, cutoff = 0.98, ...) {
+mdl_prep <- function(df, cutoff = 0.98, end_year = NULL, ...) {
   baseyear    <- min(df$year) - 1
+  if (is.null(end_year)) {
+    end_year <- lubridate::year(Sys.Date()) + 5
+  } else if (!is.numeric(end_year) || length(end_year) != 1 || is.na(end_year) ||
+             end_year != round(end_year)) {
+    stop("`end_year` must be a single whole year.", call. = FALSE)
+  } else if (end_year < max(df$year)) {
+    stop("`end_year` (", end_year, ") is earlier than the last year in the data (",
+         max(df$year), ").", call. = FALSE)
+  }
 
   df %>%
     #
@@ -91,7 +104,7 @@ mdl_prep <- function(df, cutoff = 0.98, ...) {
     tidybayes::compose_data() %>%
     within(., {
       year = year - baseyear
-      nyears = lubridate::year(Sys.Date()) + 5 - baseyear #2025 - baseyear
+      nyears = end_year - baseyear
       survey_count = data.frame(country, survey) %>%
         distinct() %>%
         count(country) %>%

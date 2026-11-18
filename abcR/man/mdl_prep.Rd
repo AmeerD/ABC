@@ -4,12 +4,17 @@
 \alias{mdl_prep}
 \title{Pre-process ABC model input.}
 \usage{
-mdl_prep(df, cutoff = 0.98, ...)
+mdl_prep(df, cutoff = 0.98, end_year = NULL, ...)
 }
 \arguments{
 \item{df}{Raw input data frame produced by \code{\link{mk_dataset_4modeling}}.}
 
 \item{cutoff}{Extreme value cap (DEPRECATED).}
+
+\item{end_year}{Last calendar year of the latent series, which fixes the
+number of modelled years (\code{nyears}). The default, \code{NULL}, uses
+the current year plus five, so the model dimensions depend on the date the
+code is run; supply a year to make a run reproducible at a later date.}
 
 \item{...}{Pass through parameters.}
 }
