@@ -213,7 +213,7 @@ get_nsvar <- function(df, raw_mcmc) {
     rename(iteration = .draw, value = .value) %>%
     group_by(country, iteration) %>%
     summarise(m = mean(value)) %>%
-    pivot_wider(names_from = "country", values_from = "m") %>%
+    tidyr::pivot_wider(names_from = "country", values_from = "m") %>%
     select(-iteration) %>%
     select(order(colnames(.)))))
 }
