@@ -24,3 +24,10 @@ library(abcR)
 ## Sample Data
 
 We provide a sample dataset in the [data](https://github.com/AmeerD/ABC/tree/main/data) folder to illustrate the mechanisms of the model. Note that due to data sharing policies, the presented data contains ten anonymised countries and random noise has been added to all observed values. The magnitude of this error exceeds the sampling variation for a great majority of the data points. Readers may experiment with this data using the ABCtest.R script in the [scripts](https://github.com/AmeerD/ABC/tree/main/scripts) folder. 
+
+## Pre-processed survey files
+
+`agg_survey()` reads pre-processed surveys from `data/<survey>_prepped.qs2`, saved with [qs2](https://cran.r-project.org/package=qs2). Files saved with the former `qs` package (`data/<survey>_prepped.qs`) are still read when `qs` is installed. Since `qs` has been archived on CRAN, such files can be converted once, in an environment where `qs` is available:
+```r
+qs2::qs_save(qs::qread("data/XXX_prepped.qs"), "data/XXX_prepped.qs2")
+```

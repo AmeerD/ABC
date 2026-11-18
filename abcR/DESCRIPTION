@@ -34,6 +34,7 @@ Imports:
     ggthemes,
     forcats,
     utils,
-    qs
+    qs2
 Suggests: 
-    haven
+    haven,
+    qs

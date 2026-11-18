@@ -7,12 +7,14 @@
 agg_survey(survey, bycats, estimate_se = FALSE)
 }
 \arguments{
-\item{survey}{Survey data file.}
+\item{survey}{Survey identifier.}
 
 \item{bycats}{Category for aggregation.}
 
 \item{estimate_se}{Boolean indicating whether to estimate standard errors.}
 }
 \description{
-Aggregate surveys
+Reads the pre-processed survey \code{data/<survey>_prepped.qs2}, or, when
+that file does not exist, \code{data/<survey>_prepped.qs} written with the
+former \pkg{qs} package (which then has to be installed).
 }

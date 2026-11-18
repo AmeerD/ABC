@@ -38,19 +38,44 @@ level_names <- function(...) {
 
 #' Aggregate surveys
 #'
-#' @param survey Survey data file.
+#' Reads the pre-processed survey \code{data/<survey>_prepped.qs2}, or, when
+#' that file does not exist, \code{data/<survey>_prepped.qs} written with the
+#' former \pkg{qs} package (which then has to be installed).
+#'
+#' @param survey Survey identifier.
 #' @param bycats Category for aggregation.
 #' @param estimate_se Boolean indicating whether to estimate standard errors.
 #'
 #' @export
 agg_survey <- function(survey, bycats, estimate_se = FALSE) {
-  path = paste0('data/', survey, '_prepped.qs');
-  qs::qread(path) %>%
+  read_prepped_survey(survey) %>%
     filter(between(age, 10, 45)) %>%
     mutate(variable = level) %>%
     wide_aggregate(categories = bycats, depth = length(bycats), estimate_se = estimate_se) %>%
     filter(category == paste(bycats, collapse = ' and ')) %>%
     select(-category)
+}
+
+# Read a pre-processed survey file from `dir`. A qs2 file is preferred; a file
+# written with the former qs package is still read when qs is installed, so
+# existing data folders keep working unchanged.
+read_prepped_survey <- function(survey, dir = "data") {
+  qs2_path <- file.path(dir, paste0(survey, "_prepped.qs2"))
+  qs_path  <- file.path(dir, paste0(survey, "_prepped.qs"))
+  if (file.exists(qs2_path)) {
+    return(qs2::qs_read(qs2_path))
+  }
+  if (file.exists(qs_path)) {
+    if (!requireNamespace("qs", quietly = TRUE)) {
+      stop("'", qs_path, "' was written with the qs package, which is not ",
+           "installed (it has been archived on CRAN). Convert the file once, ",
+           "where qs is available, with qs2::qs_save(qs::qread(\"", qs_path,
+           "\"), \"", qs2_path, "\").", call. = FALSE)
+    }
+    return(qs::qread(qs_path))
+  }
+  stop("Pre-processed survey file not found: '", qs2_path, "' (or '", qs_path,
+       "').", call. = FALSE)
 }
 
 #' Load raw data into R.
