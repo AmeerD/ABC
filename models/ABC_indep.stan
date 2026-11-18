@@ -3,28 +3,28 @@ data {
   int nyears;
   int n_country;
   int n_survey;
-  int survey_count[n_country]; //Vector of country identifiers for each survey
-  int year[n];
-  int country[n];  
-  int survey[n];
+  array[n_country] int survey_count; //Vector of country identifiers for each survey
+  array[n] int year;
+  array[n] int country;  
+  array[n] int survey;
   vector[n] obsage;
-  int recondist[n];
-  int truage5mlt[n];
+  array[n] int recondist;
+  array[n] int truage5mlt;
   vector[n] value;
   vector[n] se_q2;
-  int haslate2[n_country];
-  int hasvlate2[n_country];
+  array[n_country] int haslate2;
+  array[n_country] int hasvlate2;
 }
 
 transformed data {
-  int agg_survey_count[n_country + 1];
-  int recondist3[n];
+  array[n_country + 1] int agg_survey_count;
+  array[n] int recondist3;
   vector[n] reconvar;
   vector[n] halfobsage;
   int nlate = sum(haslate2);
   int nvlate = sum(hasvlate2);
-  int lateidx[n_country];
-  int vlateidx[n_country];
+  array[n_country] int lateidx;
+  array[n_country] int vlateidx;
   int counter = 1;
   int vcounter = 1;
   
