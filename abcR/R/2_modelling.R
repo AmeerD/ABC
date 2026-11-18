@@ -203,8 +203,13 @@ init_drift <- function(ncountry, nyears, joint = FALSE) {
 #' It should not be called directly, and instead should only be called
 #' through the \code{\link{mdl_run}} function.
 #'
+#' Initial values for the drift parameter are drawn separately for every chain.
+#' With \code{nchains > 1} the chains are numbered \code{chain_nr},
+#' \code{chain_nr + 1}, ..., the same numbering as when one chain is run per
+#' call.
+#'
 #' @param data Input data frame.
-#' @param chain_nr NUTS chain number.
+#' @param chain_nr NUTS chain number (of the first chain when \code{nchains > 1}).
 #' @param init Initialization method.
 #' @param model ABC Stan model.
 #' @param nchains Number of chains.
@@ -215,13 +220,15 @@ init_drift <- function(ncountry, nyears, joint = FALSE) {
 #'
 #' @return Returns a stanfit object.
 mdl_core <- function(data, chain_nr, init = 'random', model, nchains, nburn, niter, nthin, ...) {
-  init2 <- list(init_drift(data$n_country, data$nyears, !is.null(data$mprop)))
+  init2 <- lapply(seq_len(nchains), function(i) {
+    init_drift(data$n_country, data$nyears, !is.null(data$mprop))
+  })
   #smod <- stan_model(model_code = model)
   #print("Model Compiled!")
   mod <- sampling(
     model,
     seed = 2019,
-    chain_id = chain_nr,
+    chain_id = chain_nr + seq_len(nchains) - 1,
     chains = nchains,
     data = data,
     init = init2,

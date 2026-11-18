@@ -19,7 +19,7 @@ mdl_core(
 \arguments{
 \item{data}{Input data frame.}
 
-\item{chain_nr}{NUTS chain number.}
+\item{chain_nr}{NUTS chain number (of the first chain when \code{nchains > 1}).}
 
 \item{init}{Initialization method.}
 
@@ -42,4 +42,10 @@ Returns a stanfit object.
 \code{mdl_core} calls the Stan sampler to sample from the ABC model.
 It should not be called directly, and instead should only be called
 through the \code{\link{mdl_run}} function.
+}
+\details{
+Initial values for the drift parameter are drawn separately for every chain.
+With \code{nchains > 1} the chains are numbered \code{chain_nr},
+\code{chain_nr + 1}, ..., the same numbering as when one chain is run per
+call.
 }
